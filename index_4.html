@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Booking Rules</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#EDF1F3; --surface:#FFFFFF; --surface-2:#F5F8F9;
+  --ink:#131C22; --muted:#5B6B76; --faint:#8494A0; --line:#D3DCE1;
+  --accent:#15586B; --accent-soft:#DCEAEF;
+  --ok:#2C6B51; --ok-soft:#DCEDE3;
+  --warn:#A9531B; --warn-soft:#F6E5D6;
+  --crit:#8E2B2B; --crit-soft:#F4DFDF;
+  --shadow:0 1px 2px rgba(19,28,34,.06), 0 6px 18px -12px rgba(19,28,34,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0D1418; --surface:#151F25; --surface-2:#1B262D;
+    --ink:#E4EBEF; --muted:#9BABB6; --faint:#71838E; --line:#26333B;
+    --accent:#6BB6CB; --accent-soft:#17323C;
+    --ok:#77C39C; --ok-soft:#183026;
+    --warn:#E0A272; --warn-soft:#33241A;
+    --crit:#E38686; --crit-soft:#341D1D;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -14px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0D1418; --surface:#151F25; --surface-2:#1B262D;
+  --ink:#E4EBEF; --muted:#9BABB6; --faint:#71838E; --line:#26333B;
+  --accent:#6BB6CB; --accent-soft:#17323C;
+  --ok:#77C39C; --ok-soft:#183026;
+  --warn:#E0A272; --warn-soft:#33241A;
+  --crit:#E38686; --crit-soft:#341D1D;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -14px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size:15px; line-height:1.5;
+}
+.wrap{max-width:1180px; margin:0 auto; padding-inline:16px; padding-block:22px 56px}
+h1,h2,h3{font-family:"Source Serif 4", Georgia, serif; font-weight:600; margin:0; text-wrap:balance}
+h1{font-size:clamp(23px,4.4vw,31px); letter-spacing:-.01em}
+h2{font-size:18px}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+header.top{display:flex; flex-wrap:wrap; gap:14px 20px; align-items:flex-end; justify-content:space-between; border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:18px}
+header.top p{margin:6px 0 0; color:var(--muted); max-width:62ch; font-size:14px}
+.stats{display:flex; gap:18px; flex-wrap:wrap}
+.stat{min-width:74px}
+.stat .n{font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:600; font-variant-numeric:tabular-nums; display:block; line-height:1.1}
+.stat .l{font-size:11px; color:var(--faint); text-transform:uppercase; letter-spacing:.09em}
+.cols{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:22px; align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:6px; box-shadow:var(--shadow)}
+.panel-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:13px 15px; border-bottom:1px solid var(--line)}
+.panel-head p{margin:3px 0 0; font-size:12.5px; color:var(--muted)}
+.list{display:flex; flex-direction:column}
+.prog{padding:12px 15px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:1fr auto; gap:4px 12px}
+.prog:last-child{border-bottom:0}
+.prog.booked{background:var(--ok-soft)}
+.prog.out{opacity:.5}
+.pname{font-weight:600; font-size:15px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.chance{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); border:1px solid var(--line); border-radius:99px; padding:1px 7px; background:var(--surface-2)}
+.tag{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; padding:1px 6px; border-radius:3px}
+.tag.lock{background:var(--crit-soft); color:var(--crit)}
+.tag.flex{background:var(--surface-2); color:var(--faint)}
+.toggles{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
+.toggles .chip.on{background:var(--warn); border-color:var(--warn); color:#fff}
+:root[data-theme="dark"] .toggles .chip.on, :root:not([data-theme="light"]) .toggles .chip.on{color:#0D1418}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .toggles .chip.on{color:#fff}}
+.verdict{grid-column:1/-1; margin-top:8px; padding:6px 10px; border-left:3px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:500; border-radius:0 4px 4px 0}
+.addrow button.alt{background:var(--surface); color:var(--accent)}
+.commit{grid-column:1/-1; font-size:12px; color:var(--warn); margin-top:4px}
+.pnote{grid-column:1/-1; font-size:12.5px; color:var(--muted); margin-top:2px}
+.opts{grid-column:1/-1; display:flex; flex-direction:column; gap:5px; margin-top:8px}
+.opt{display:flex; gap:10px; align-items:flex-start; text-align:left; width:100%; background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:4px; padding:7px 10px; font:inherit; color:inherit; cursor:pointer}
+.opt:hover{border-color:var(--accent); background:var(--accent-soft)}
+.opt:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.opt[disabled]{cursor:not-allowed; opacity:.62}
+.opt.best{border-left-color:var(--ok); background:var(--ok-soft)}
+.opt.risky{border-left-color:var(--warn); background:var(--warn-soft)}
+.opt.blocked{border-left-color:var(--crit); background:var(--crit-soft)}
+.opt .d{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:13px; white-space:nowrap; min-width:88px}
+.opt .why{font-size:12.5px; color:var(--muted); flex:1}
+.rank{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); min-width:52px}
+.acts{display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+button.mini{font:inherit; font-size:12px; padding:3px 9px; border-radius:4px; border:1px solid var(--line); background:var(--surface); color:var(--muted); cursor:pointer}
+button.mini:hover{border-color:var(--accent); color:var(--accent)}
+button.mini:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.booked-line{grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:6px; font-size:13px}
+.booked-line .d{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ok)}
+.cal{padding:12px 15px 16px}
+.month{margin-bottom:16px}
+.month h3{font-size:14px; margin-bottom:6px; display:flex; align-items:baseline; gap:8px}
+.grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:3px}
+.dow{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--faint); text-align:center; padding-bottom:2px}
+.cell{min-height:58px; border:1px solid var(--line); border-radius:3px; padding:3px 4px; font-size:10px; background:var(--surface-2); overflow:hidden}
+.cell.blank{border-color:transparent; background:transparent}
+.cell .dn{font-family:"IBM Plex Mono",monospace; color:var(--faint); font-size:10px}
+.cell.has{background:var(--surface)}
+.cell.bookedday{background:var(--ok-soft); border-color:var(--ok)}
+.cell.bookedday .dn{color:var(--ok)}
+.cell.evening{background:var(--warn-soft); border-color:var(--warn); border-style:dashed}
+.cell.evening .dn{color:var(--warn)}
+.cell.evening .who{color:var(--warn)}
+.cell.hold{background:var(--crit-soft); border-color:var(--crit)}
+.cell.hold .dn{color:var(--crit)}
+.cell.holiday{background:var(--accent-soft); border-color:var(--accent-soft)}
+.cell .who{display:block; line-height:1.3; color:var(--muted); overflow-wrap:break-word; hyphens:none}
+.cell.bookedday .who{color:var(--ok); font-weight:600}
+.legend{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:11.5px; color:var(--muted); padding-top:4px}
+.swatch{display:inline-block; width:10px; height:10px; border-radius:2px; border:1px solid var(--line); margin-right:5px; vertical-align:-1px}
+.rules{padding:13px 15px 16px; font-size:13.5px; color:var(--muted)}
+.rules ol{margin:8px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:7px}
+.rules strong{color:var(--ink)}
+/* The one control that worked had no child elements; the ones that failed had
+   spans inside. Make children transparent to pointers so the event target is
+   always the button itself. */
+.opt > *, .chip > *, button.mini > *, .addrow button > *{pointer-events:none}
+.searchrow{display:flex; align-items:center; gap:10px; padding:10px 15px; border-bottom:1px solid var(--line); background:var(--surface-2)}
+.searchrow input{flex:1; min-width:0; font:inherit; font-size:14px; padding:7px 10px; border:1px solid var(--line); border-radius:5px; background:var(--surface); color:var(--ink)}
+.searchrow input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.searchrow span{font-size:11.5px; color:var(--faint); white-space:nowrap}
+.empty-search{padding:16px 15px; font-size:13.5px; color:var(--muted)}
+
+[hidden]{display:none !important}
+.gate{max-width:440px; margin:40px auto; padding:26px 24px; text-align:left}
+.gate h2{margin-bottom:8px}
+.gate p{margin:0 0 18px; font-size:13.5px; color:var(--muted)}
+.gate-btn{font:inherit; font-size:14px; padding:9px 16px; border-radius:5px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer}
+:root[data-theme="dark"] .gate-btn, :root:not([data-theme="light"]) .gate-btn{color:#0D1418}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .gate-btn{color:#fff}}
+.gate-msg{margin-top:14px; font-size:13px; color:var(--crit)}
+.metrics{width:100%; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--faint); letter-spacing:.04em}
+.saving{font-size:11.5px; color:var(--faint); font-family:"IBM Plex Mono",monospace}
+footer{margin-top:24px; font-size:12px; color:var(--faint); border-top:1px solid var(--line); padding-top:12px}
+.editor{grid-column:1/-1; margin-top:8px; border:1px dashed var(--line); border-radius:4px; padding:10px; background:var(--surface-2)}
+.editor .hd{font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--faint); margin-bottom:7px}
+.dline{display:flex; align-items:center; gap:8px; padding:3px 0; font-size:13px}
+.dline .d{font-family:"IBM Plex Mono",monospace; font-weight:500; min-width:92px}
+.dline .src{font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--faint)}
+.dline .src.own{color:var(--ok)}
+.dline button{margin-left:auto}
+.addrow{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap}
+.addrow input{flex:1; min-width:120px; font:inherit; font-family:"IBM Plex Mono",monospace; font-size:13px; padding:5px 8px; border:1px solid var(--line); border-radius:4px; background:var(--surface); color:var(--ink)}
+.addrow input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.addrow button{font:inherit; font-size:12.5px; padding:5px 11px; border-radius:4px; border:1px solid var(--accent); background:var(--accent); color:var(--surface); cursor:pointer}
+:root[data-theme="dark"] .addrow button, :root:not([data-theme="light"]) .addrow button{color:#0D1418}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .addrow button{color:#fff}}
+.chips{display:flex; flex-wrap:wrap; gap:6px; padding:12px 15px 14px}
+.chip{font:inherit; font-size:12.5px; padding:4px 10px; border-radius:99px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px}
+.chip:hover{border-color:var(--accent); color:var(--accent)}
+.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500}
+:root[data-theme="dark"] .chip[aria-pressed="true"], :root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#0D1418}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .chip[aria-pressed="true"]{color:#fff}}
+.chip .pct{font-family:"IBM Plex Mono",monospace; font-size:11px; opacity:.75}
+.tag.top{background:var(--accent); color:#fff}
+:root[data-theme="dark"] .tag.top, :root:not([data-theme="light"]) .tag.top{color:#0D1418}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .tag.top{color:#fff}}
+.planrow.top .nm{font-weight:600}
+.planrow.top .nm::after{content:" ★"; color:var(--accent); font-size:11px}
+.plan{display:flex; flex-direction:column; padding:6px 15px 4px}
+.planrow{display:flex; align-items:baseline; gap:10px; padding:5px 0; border-bottom:1px dotted var(--line); font-size:13.5px}
+.planrow:last-child{border-bottom:0}
+.planrow .d{min-width:104px; font-size:12.5px; color:var(--muted)}
+.planrow .nm{font-weight:500; flex:1}
+.planrow .src{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--faint)}
+.planrow.locked{color:var(--ok)}
+.planrow.locked .d, .planrow.locked .src{color:var(--ok)}
+.planrow.hit{background:var(--crit-soft); margin-inline:-8px; padding-inline:8px; border-radius:3px}
+.planrow.hit .d{color:var(--crit)}
+.plan-note{padding:8px 15px 14px; font-size:12.5px; color:var(--muted)}
+.tag.plan{background:var(--accent-soft); color:var(--accent)}
+.hint{font-size:11.5px; color:var(--faint); margin-top:6px}
+.err{font-size:12px; color:var(--crit); margin-top:6px}
+.nodates{grid-column:1/-1; font-size:12.5px; color:var(--warn); margin-top:6px}
+@media (prefers-reduced-motion:no-preference){.opt{transition:background .12s ease, border-color .12s ease}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Neurosurgery 2026–27 · predicted dates</div>
+      <h1>Interview Booking Rules</h1>
+      <p>Tap the date you're offered when an invite lands. Every other program's recommendation re-ranks around what you've already booked, so the next decision is always on screen. Dates are last cycle's, shifted a day — replace any of them with the real ones as programs post them.</p>
+    </div>
+    <div class="stats" id="app-stats">
+      <div class="stat"><span class="n" id="s-booked">0</span><span class="l">Booked</span></div>
+      <div class="stat"><span class="n" id="s-open">0</span><span class="l">Awaiting</span></div>
+      <div class="stat"><span class="n" id="s-exp">0</span><span class="l">Expected left</span></div>
+      <div class="stat"><span class="n" id="s-risk">0</span><span class="l">At risk</span></div>
+    </div>
+    <div id="metrics" class="metrics" hidden>taps 0 · clicks 0 · actions 0</div>
+  </header>
+
+  <section class="panel gate" id="gate" hidden>
+    <h2>Sign in to continue</h2>
+    <p>This board is tied to your Google account. Your bookings, dates and top picks are stored privately and are visible only to you.</p>
+    <button class="gate-btn" data-act="signin">Sign in with Google</button>
+    <div class="gate-msg" id="gate-msg"></div>
+  </section>
+
+  <div class="cols" id="app">
+    <div style="display:flex; flex-direction:column; gap:22px">
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2>Top programs <span id="top-count" class="mono" style="color:var(--faint);font-size:14px"></span></h2><p>The ones you'd take over anything else. Their days get defended first, and anything else gets moved out of their way.</p></div>
+        </div>
+        <div class="chips" id="tops"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2>Programs</h2><p id="sub-programs">Top picks first, then by how likely an invite is. Green is the slot to take.</p></div>
+          <span class="saving" id="saving"></span>
+        </div>
+        <div class="searchrow">
+          <input type="search" id="search" placeholder="Find a program…" autocomplete="off" spellcheck="false" aria-label="Find a program">
+          <span class="mono" id="search-count"></span>
+        </div>
+        <div class="list" id="programs"></div>
+      </section>
+
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:22px">
+      <section class="panel">
+        <div class="panel-head"><div><h2>Best overall plan</h2><p id="plan-sum"></p></div></div>
+        <div class="plan" id="plan"></div>
+        <div class="plan-note" id="plan-note"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><h2>Calendar</h2><p>Booked days, days held for single-date programs, and holidays.</p></div></div>
+        <div class="cal" id="calendar"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><h2>Standing rules</h2></div></div>
+        <div class="rules">
+          <ol>
+            <li><strong>Book the day the invite arrives.</strong> Slots go first-come, and a date you hesitate on is usually the one that disappears.</li>
+            <li><strong>Protect the single-date programs.</strong> Penn (Thu 1/7) and Tennessee (Mon 11/16) cannot move. Nothing else gets booked on those days while they're still open.</li>
+            <li><strong>Move the flexible program, not the scarce one.</strong> If two collide, keep the program with fewer remaining dates and ask the other for its alternate — that request is routine in the first week.</li>
+            <li><strong>Keep a buffer.</strong> Leave two open days a month for Vermont, Wake Forest, Georgetown and GW until their dates post.</li>
+            <li><strong>Watch the evening before.</strong> Most programs hold a dinner the night before, so a same-city back-to-back is fine and a cross-country one is not.</li>
+            <li><strong>Decline early, not late.</strong> Below about 20% likelihood, take the interview only if the day is still free.</li>
+          </ol>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <div id="sync" style="margin-bottom:6px"></div>
+    <div id="diag" style="color:var(--crit); margin-bottom:6px"></div>
+    Dates are predictions: last cycle's dates shifted back one day, which holds the weekday and the position relative to Thanksgiving. Replace a prediction with a real date as each program posts it — the ranking logic doesn't depend on the dates being right, only on which days collide.
+  </footer>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+<script>
+const PROGRAMS = [
+  {id:"tufts", name:"Tufts", p:95, note:"Home program. Four dates — the easiest thing on the board to move.", opts:[["2026-12-03"],["2026-12-10"],["2027-01-07"],["2027-01-14"]]},
+  {id:"utah", pre:"Dinner with residents", name:"Utah", p:87, note:"Dinner Wednesday evening, interviews Thursday. Arrive the day before.", opts:[["2026-11-05"],["2026-11-12"]]},
+  {id:"dartmouth", pre:"Dinner with residents", name:"Dartmouth", p:72, note:"Dinner with residents the evening before.", opts:[["2026-11-06"],["2026-11-13"],["2026-12-18"]]},
+  {id:"wvu", pre:"Dinner + complimentary housing", name:"West Virginia", p:65, note:"Dinner and housing the night before. Dates read \"3, 10, 14\" in the source — verify.", opts:[["2026-11-02"],["2026-11-09"],["2026-11-13"]]},
+  {id:"mgb", post:"Dinner that evening", name:"MGB", p:62, note:"Full day, dinner that evening.", opts:[["2027-01-05"],["2027-01-06"]]},
+  {id:"bidmc", pre:"Dinner, 7–9 pm", name:"Beth Israel", p:62, note:"Dinner the night before, 7–9 pm.", opts:[["2026-11-13"],["2026-12-09"],["2026-12-17"]]},
+  {id:"jefferson", pre:"Dinner with residents", name:"Thomas Jefferson", p:60, note:"Saturday interviews, dinner the Friday evening before.", opts:[["2026-11-07"],["2026-12-05"],["2027-01-09"]]},
+  {id:"vcu", name:"VCU", p:60, note:"Two-day block: dinner the first evening, interviews the next day.", opts:[["2026-12-01","2026-12-02"],["2026-12-07","2026-12-08"],["2026-12-13","2026-12-14"]]},
+  {id:"maryland", pre:"Dinner with residents", name:"Maryland", p:57, note:"Dinner with residents the evening before.", opts:[["2026-11-06"],["2026-12-04"],["2026-12-18"]]},
+  {id:"einstein", name:"Albert Einstein", p:57, note:"Listed as Montefiore. No evening events noted.", opts:[["2026-11-13"],["2026-12-11"],["2027-01-08"]]},
+  {id:"inova", pre:"Dinner with residents", name:"Inova", p:55, note:"Dinner with residents the night before.", opts:[["2026-11-10"],["2026-12-01"]]},
+  {id:"uva", post:"Dinner at the Chair's", name:"UVA", p:52, note:"Two days: happy hour the evening before, dinner at the Chair's at the end.", opts:[["2026-11-18","2026-11-19"],["2026-12-09","2026-12-10"],["2027-01-13","2027-01-14"]]},
+  {id:"colorado", pre:"Faculty lectures + dinner", post:"Closing reception", name:"Colorado", p:52, note:"Lectures and dinner the evening before; housing covered Thursday and Friday.", opts:[["2026-11-06"],["2026-12-04"],["2027-01-08"]]},
+  {id:"unc", pre:"Dinner with residents", name:"UNC", p:52, note:"Dinner with residents the Tuesday evening before. December date unreadable in the source.", opts:[["2026-11-04"],["2026-11-11"]]},
+  {id:"carolinas", pre:"Optional dinner", name:"Carolinas", p:52, note:"Optional dinner the night before.", opts:[["2026-11-07"],["2026-12-05"]]},
+  {id:"pitt", pre:"Dinner with residents", post:"Dinner with residents + faculty", name:"Pitt", p:47, note:"Dinner the evening before AND the night of — plan two nights.", opts:[["2026-11-02"],["2026-12-11"],["2027-01-15"]]},
+  {id:"emory", pre:"Dinner + site tour", name:"Emory", p:47, note:"Dinner and site tour the evening before.", opts:[["2027-01-09"],["2027-01-10"]]},
+  {id:"tennessee", pre:"Dinner with residents", post:"Optional lab that evening", name:"Tennessee", p:47, note:"Only one date. Dinner Sunday evening, interviews all day Monday, optional lab that evening.", opts:[["2026-11-16"]]},
+  {id:"michigan", pre:"Dinner with residents", name:"Michigan", p:42, note:"Five dates — the most flexible program on the list. Dinner the evening before.", opts:[["2026-11-05"],["2026-11-10"],["2026-11-30"],["2026-12-11"],["2027-01-11"]]},
+  {id:"uw", name:"U Washington", p:37, note:"Two days: presentations, tour and dinner on day 1; interviews day 2 morning.", opts:[["2026-11-20","2026-11-21"],["2027-01-08","2027-01-09"]]},
+  {id:"penn", post:"Dinner on the interview day", name:"Penn", p:37, note:"Only one date. Dinner is on the interview day itself. Nov/Dec dates unreadable in the source.", opts:[["2027-01-07"]]},
+  {id:"duke", post:"Dinner the evening after", name:"Duke", p:37, note:"Paired dates; dinner the evening after the interview day.", opts:[["2026-11-13","2026-11-14"],["2026-12-04","2026-12-05"]]},
+  {id:"umass", pre:"Meet-and-greet + dinner", name:"UMass", p:19, note:"Meet-and-greet, research talks and dinner the evening before.", opts:[["2026-11-17"],["2026-12-02"],["2026-12-10"]]},
+  {id:"brown", pre:"Welcome dinner", name:"Brown", p:16, note:"Welcome dinner the evening before; morning and afternoon groups.", opts:[["2026-11-02"],["2026-11-10"]]},
+  {id:"uconn", name:"UConn", p:15, note:"Virtual interviews — no travel. Second Look visits are separate.", opts:[["2026-11-05"],["2026-12-03"],["2027-01-09"],["2027-01-23"]]},
+  {id:"albany", pre:"Meet-and-greet dinner", name:"Albany", p:13, note:"Meet-and-greet dinner the night before.", opts:[["2026-11-09"],["2026-12-09"]]},
+  {id:"geisinger", pre:"Dinner with residents", name:"Geisinger", p:12, note:"Dinner with residents the evening prior.", opts:[["2026-11-03"],["2026-11-20"]]},
+  {id:"miami", pre:"Dinner with faculty + residents", name:"Miami", p:10, note:"Dinner with faculty and residents the evening before.", opts:[["2026-11-07"],["2026-11-21"]]},
+  {id:"stanford", pre:"Informal dinner", name:"Stanford", p:9, note:"Informal dinner the evening before; full day with campus tour.", opts:[["2026-11-14"],["2026-12-12"],["2027-01-22"]]},
+  {id:"uchicago", pre:"Dinner with residents", name:"UChicago", p:9, note:"Dinner with residents the evening before.", opts:[["2026-11-11"],["2026-12-02"]]},
+  {id:"vermont", name:"Vermont", p:67, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
+  {id:"wake", name:"Wake Forest", p:60, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
+  {id:"georgetown", name:"Georgetown", p:60, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
+  {id:"gwu", name:"George Washington", p:60, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
+  {id:"maine", name:"Maine Medical Center", p:15, note:"Not in last cycle's sheet — add dates when they post.", opts:[]},
+  {id:"rutgers", name:"Rutgers", p:11, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
+  {id:"yale", name:"Yale", p:11, note:"No dates listed; dinner with residents and Grand Rounds.", opts:[]}
+];
+const PREDICTED = Object.fromEntries(PROGRAMS.map(p => [p.id, p.opts]));
+const PRE0  = Object.fromEntries(PROGRAMS.map(p => [p.id, p.pre  || null]));
+const POST0 = Object.fromEntries(PROGRAMS.map(p => [p.id, p.post || null]));
+const HOLIDAYS = {"2026-11-26":"Thanksgiving","2026-11-27":"Holiday","2026-12-24":"Christmas Eve","2026-12-25":"Christmas","2026-12-31":"New Year's Eve","2027-01-01":"New Year's Day","2027-01-18":"MLK Day"};
+const BASE_MONTHS = ["2026-11","2026-12","2027-01"];
+const BY_ID = Object.fromEntries(PROGRAMS.map(p => [p.id, p]));
+
+/* ---------- state ---------- */
+let state = {};            // id -> {status:"booked"|"out", opt:number}
+let dates = {};            // id -> [[iso,...], ...]  replaces the predicted dates
+let tops = {};             // id -> true  programs you'd take over anything else
+let commits = {};          // id -> {pre: string|null, post: string|null}  overrides what a program expects
+const TOP_BOOST = 3;       // how hard the algorithm defends a top pick's days
+
+/* Everything the algorithm weighs runs through this, not the raw percentage. */
+function weight(p){ return p.p * (tops[p.id] ? TOP_BOOST : 1); }
+let editing = {};          // id -> true while its date editor is open
+let editMsg = {};          // id -> a note from the last edit, kept across the re-render
+let db = null, saveTimer = null, lastSaved = "", pending = false;
+
+function applyDates(){
+  for(const p of PROGRAMS){
+    p.opts = dates[p.id] ? dates[p.id] : PREDICTED[p.id];
+    const c = commits[p.id];
+    p.pre  = c && "pre"  in c ? c.pre  : PRE0[p.id];
+    p.post = c && "post" in c ? c.post : POST0[p.id];
+  }
+}
+function setCommit(id, field, on){
+  const c = commits[id] = commits[id] || {};
+  c[field] = on ? (field === "pre" ? "Dinner the evening before" : "Commitment that evening") : null;
+  applyDates();
+  render();
+  save();
+}
+function monthsInPlay(){
+  const set = new Set(BASE_MONTHS);
+  for(const p of PROGRAMS) for(const o of p.opts) for(const d of o) set.add(d.slice(0,7));
+  return [...set].sort().map(key => {
+    const [y, m] = key.split("-").map(Number);
+    return {y, m: m-1, label: new Date(y, m-1, 1).toLocaleDateString("en-US",{month:"long", year:"numeric"})};
+  });
+}
+/* A list of offers: "11/13, 12/4-5, 1/9" or one per line -> [[days], [days], ...]
+   with anything unparseable reported back. */
+function parseList(raw){
+  const parts = (raw || "").split(/[,;\n]+/).map(t => t.trim()).filter(Boolean);
+  const ok = [], bad = [];
+  for(const t of parts){
+    const d = parseEntry(t);
+    if(d) ok.push(d); else bad.push(t);
+  }
+  return {ok, bad};
+}
+/* "11/13", "12/4-5", "11/30-12/1", "2026-11-13" -> ["2026-11-13", ...] or null */
+function parseEntry(raw){
+  const txt = (raw || "").trim().replace(/\s+/g,"").replace(/[–—]/g,"-");
+  if(!txt) return null;
+  const iso = s => {
+    let m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
+    if(m) return m[1] + "-" + String(+m[2]).padStart(2,"0") + "-" + String(+m[3]).padStart(2,"0");
+    m = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/.exec(s);
+    if(!m) return null;
+    const mo = +m[1], day = +m[2];
+    if(mo < 1 || mo > 12 || day < 1 || day > 31) return null;
+    let yr = m[3] ? (+m[3] < 100 ? 2000 + +m[3] : +m[3]) : (mo >= 7 ? 2026 : 2027);
+    return yr + "-" + String(mo).padStart(2,"0") + "-" + String(day).padStart(2,"0");
+  };
+  const valid = s => { const d = parse(s); return d && !isNaN(d) && d.getDate() === +s.slice(8); };
+  const parts = txt.split("-");
+  let first, last;
+  if(parts.length === 1 || /^\d{4}$/.test(parts[0])){        // single day, incl. ISO form
+    first = last = iso(txt);
+  } else {
+    first = iso(parts[0]);
+    const tail = parts.slice(1).join("-");
+    last = /\//.test(tail) || /^\d{4}-/.test(tail)
+      ? iso(tail)
+      : (first ? first.slice(0,8) + String(+tail).padStart(2,"0") : null);
+  }
+  if(!first || !last || !valid(first) || !valid(last)) return null;
+  if(parse(last) < parse(first)) return null;
+  const out = [];
+  for(let d = first; ; d = shift(d, 1)){
+    out.push(d);
+    if(d === last || out.length > 6) break;
+  }
+  return out.length > 6 ? null : out;
+}
+
+function parse(d){ const [y,m,day] = d.split("-").map(Number); return new Date(y, m-1, day); }
+function fmt(d){ return parse(d).toLocaleDateString("en-US",{weekday:"short", month:"numeric", day:"numeric"}); }
+function fmtOpt(days){
+  if(days.length === 1) return fmt(days[0]);
+  const a = parse(days[0]), b = parse(days[days.length-1]);
+  const wd = s => s.toLocaleDateString("en-US",{weekday:"short"});
+  return wd(a) + "–" + wd(b) + " " + (a.getMonth()+1) + "/" + a.getDate() + "–" + b.getDate();
+}
+function shift(d, n){ const x = parse(d); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); }
+
+/* A program occupies more than its interview day: an evening-before dinner
+   claims the night before, so two interviews on consecutive days collide when
+   the later one expects you at dinner. Weight 1 = the day itself, 0.6 = an
+   evening commitment. */
+function footprint(p, days){
+  const f = days.map(d => ({day: d, w: 1, kind: "interview"}));
+  if(p.pre) f.unshift({day: shift(days[0], -1), w: 0.6, kind: "evening"});
+  return f;
+}
+function eveningDay(p, days){ return p.pre ? shift(days[0], -1) : null; }
+
+function bookedMap(){
+  const m = {};
+  for(const p of PROGRAMS){
+    const s = state[p.id];
+    if(s && s.status === "booked") for(const d of p.opts[s.opt]) m[d] = p.id;
+  }
+  return m;
+}
+function bookedEvenings(){
+  const m = {};
+  for(const p of PROGRAMS){
+    const st = state[p.id];
+    if(st && st.status === "booked" && p.pre) m[shift(p.opts[st.opt][0], -1)] = p;
+  }
+  return m;
+}
+function isOpen(p){ const s = state[p.id]; return !s || (s.status !== "booked" && s.status !== "out"); }
+function freeOpts(p, taken){
+  return p.opts.map((o,i) => i).filter(i => p.opts[i].every(d => !taken[d] || taken[d] === p.id));
+}
+/* Days that only one still-open program can use — hold them. */
+function heldDays(taken){
+  const held = {};
+  for(const p of PROGRAMS){
+    if(!isOpen(p)) continue;
+    const free = freeOpts(p, taken);
+    if(free.length === 1) for(const d of p.opts[free[0]]) held[d] = p;
+  }
+  return held;
+}
+/* What booking prog on option oi would cost every other open program. */
+function squeeze(prog, oi, taken){
+  const after = {...taken};
+  for(const d of prog.opts[oi]) after[d] = prog.id;
+  const hurt = [];
+  for(const q of PROGRAMS){
+    if(q.id === prog.id || !isOpen(q)) continue;
+    const before = freeOpts(q, taken).length, now = freeOpts(q, after).length;
+    if(now < before) hurt.push({prog:q, before, now, lost: now === 0});
+  }
+  hurt.sort((a,b) => (b.lost - a.lost) || (weight(b.prog) - weight(a.prog)));
+  return hurt;
+}
+/* Where this option's evenings run into someone else's day, or vice versa. */
+function eveningClashes(prog, oi, taken){
+  const evenings = bookedEvenings();
+  const out = [];
+  const mine = prog.opts[oi];
+  const myEve = eveningDay(prog, mine);
+  if(myEve && taken[myEve] && taken[myEve] !== prog.id){
+    out.push({prog: BY_ID[taken[myEve]], why: "your dinner the night before falls on their interview day"});
+  }
+  for(const d of mine){
+    const other = evenings[d];
+    if(other && other.id !== prog.id) out.push({prog: other, why: "their dinner that evening falls on your interview day"});
+  }
+  return out;
+}
+function rank(prog){
+  const taken = bookedMap();
+  return prog.opts.map((days, i) => {
+    const clash = days.map(d => taken[d]).filter(x => x && x !== prog.id).map(id => BY_ID[id]);
+    const hurt = clash.length ? [] : squeeze(prog, i, taken);
+    const near = clash.length ? [] : eveningClashes(prog, i, taken);
+    let cost = clash.length ? 1e6 : 0;
+    for(const h of hurt) cost += weight(h.prog) * (h.lost ? 6 : 1) * (h.before - h.now) / Math.max(h.before, 1);
+    for(const n of near) cost += 30 + weight(n.prog) * 0.3;
+    return {i, days, clash, hurt, near, cost};
+  }).sort((a,b) => a.cost - b.cost || a.i - b.i);
+}
+function reason(o){
+  if(o.clash.length) return "Taken — " + o.clash.map(p => p.name).join(", ") + " is booked this day.";
+  const bits = [];
+  const lost = o.hurt.filter(h => h.lost);
+  const label = pr => pr.name + (tops[pr.id] ? " (top pick)" : " (" + pr.p + "%)");
+  if(lost.length) bits.push("would use up " + lost.map(h => label(h.prog)).join(" and ") + "'s last open date");
+  const tight = o.hurt.filter(h => !h.lost).slice(0,2);
+  if(tight.length) bits.push("narrows " + tight.map(h => h.prog.name + " to " + h.now).join(", "));
+  for(const n of o.near) bits.push(n.prog.name + ": " + n.why);
+  return bits.length ? bits.join("; ").replace(/^./, c => c.toUpperCase()) + "." : "Clear — nothing else needs this day.";
+}
+
+/* ---------- render ---------- */
+function render(){
+  const taken = bookedMap(), held = heldDays(taken);
+  const plan = bestPlan();
+  const planPick = {};
+  plan.openList.forEach((p, k) => { planPick[p.id] = plan.assign[k]; });
+  const listEl = document.getElementById("programs");
+  listEl.textContent = "";
+  const order = [...PROGRAMS].sort((a,b) => {
+    const rankOf = p => state[p.id]?.status === "out" ? 3
+      : state[p.id]?.status === "booked" ? 2
+      : p.opts.length === 0 ? 1 : 0;
+    return rankOf(a) - rankOf(b) || (tops[b.id] ? 1 : 0) - (tops[a.id] ? 1 : 0) || b.p - a.p;
+  });
+  let booked = 0, open = 0, exp = 0, atRisk = 0;
+
+  /* Counters below describe the whole board, so they are tallied before the
+     search filter narrows what gets drawn. */
+  const q = (document.getElementById("search")?.value || "").trim().toLowerCase();
+  const matches = p => !q || p.name.toLowerCase().includes(q) || (p.note || "").toLowerCase().includes(q);
+  let shown = 0;
+
+  for(const p of order){
+    const s = state[p.id] || {};
+    const drawn = matches(p);
+    if(drawn) shown++;
+    const el = document.createElement("div");
+    el.className = "prog" + (s.status === "booked" ? " booked" : s.status === "out" ? " out" : "");
+
+    const head = document.createElement("div");
+    head.className = "pname";
+    head.append(p.name);
+    const chance = document.createElement("span");
+    chance.className = "chance"; chance.textContent = p.p + "%";
+    head.append(chance);
+    if(tops[p.id]){
+      const t = document.createElement("span"); t.className = "tag top"; t.textContent = "top pick"; head.append(t);
+    }
+    if(dates[p.id]){
+      const t = document.createElement("span"); t.className = "tag flex"; t.style.color = "var(--ok)"; t.textContent = "your dates"; head.append(t);
+    }
+    if(p.opts.length === 0){
+      const t = document.createElement("span"); t.className = "tag lock"; t.textContent = "no dates yet"; head.append(t);
+    } else if(p.opts.length === 1){
+      const t = document.createElement("span"); t.className = "tag lock"; t.textContent = "one date only"; head.append(t);
+    } else if(isOpen(p)){
+      const free = freeOpts(p, taken).length;
+      const t = document.createElement("span");
+      t.className = "tag flex";
+      t.textContent = free + " of " + p.opts.length + " open";
+      if(free <= 1) { t.className = "tag lock"; atRisk++; }
+      head.append(t);
+    }
+    el.append(head);
+
+    const acts = document.createElement("div");
+    acts.className = "acts";
+    const edit = document.createElement("button");
+    edit.className = "mini";
+    edit.textContent = editing[p.id] ? "Done" : p.opts.length ? "Dates" : "Add dates";
+    edit.dataset.act = "edit"; edit.dataset.id = p.id;
+    acts.append(edit);
+    if(s.status === "booked" || s.status === "out"){
+      const b = document.createElement("button");
+      b.className = "mini"; b.textContent = "Reopen";
+      b.dataset.act = "reopen"; b.dataset.id = p.id;
+      acts.append(b);
+    } else {
+      const b = document.createElement("button");
+      b.className = "mini"; b.textContent = "No invite";
+      b.dataset.act = "out"; b.dataset.id = p.id;
+      acts.append(b);
+    }
+    el.append(acts);
+
+    if(s.status === "booked"){
+      booked++;
+      const line = document.createElement("div");
+      line.className = "booked-line";
+      const d = document.createElement("span");
+      d.className = "d"; d.textContent = "Booked · " + fmtOpt(p.opts[s.opt]);
+      line.append(d);
+      const note = document.createElement("span");
+      note.style.cssText = "font-size:12.5px;color:var(--muted)";
+      const bits = [];
+      if(p.pre) bits.push("arrive " + fmt(shift(p.opts[s.opt][0], -1)) + " — " + p.pre.toLowerCase());
+      if(p.post) bits.push(p.post.toLowerCase() + " after");
+      note.textContent = bits.length ? bits.join("; ") : p.note;
+      line.append(note);
+      el.append(line);
+    } else if(s.status === "out"){
+      const n = document.createElement("div");
+      n.className = "pnote"; n.textContent = "Set aside — not counted against any day.";
+      el.append(n);
+    } else {
+      open++; exp += p.p/100;
+      const n = document.createElement("div");
+      n.className = "pnote"; n.textContent = p.note;
+      el.append(n);
+
+      if(p.pre || p.post){
+        const c = document.createElement("div");
+        c.className = "commit";
+        const parts = [];
+        if(p.pre) parts.push("Evening before: " + p.pre);
+        if(p.post) parts.push("That evening: " + p.post);
+        if(commits[p.id]) parts.push("(yours)");
+        c.textContent = parts.join(" · ");
+        el.append(c);
+      }
+
+      if(p.opts.length === 0){
+        const w = document.createElement("div");
+        w.className = "nodates";
+        w.textContent = "No dates on file. Add them below and this program joins the ranking.";
+        el.append(w);
+      }
+
+      const opts = document.createElement("div");
+      opts.className = "opts";
+      const ranked = rank(p);
+      const free = ranked.filter(o => !o.clash.length);
+      if(p.opts.length >= 3 && free.length){
+        const v = document.createElement("div");
+        v.className = "verdict";
+        const best = free[0];
+        const second = free[1];
+        v.textContent = "Of the " + p.opts.length + " offered, take " + fmtOpt(best.days)
+          + (second ? " — then " + fmtOpt(second.days) : "")
+          + (free.length < p.opts.length ? " · " + (p.opts.length - free.length) + " already taken" : "");
+        el.append(v);
+      }
+      ranked.forEach((o, idx) => {
+        const btn = document.createElement("button");
+        const blocked = o.clash.length > 0;
+        const risky = !blocked && o.hurt.some(h => h.lost);
+        btn.className = "opt " + (blocked ? "blocked" : idx === 0 ? "best" : risky ? "risky" : "");
+        btn.disabled = blocked;
+        const rk = document.createElement("span");
+        rk.className = "rank";
+        rk.textContent = blocked ? "taken" : idx === 0 ? "take this" : risky ? "last resort" : "fallback " + idx;
+        const d = document.createElement("span");
+        d.className = "d"; d.textContent = fmtOpt(o.days);
+        const why = document.createElement("span");
+        why.className = "why"; why.textContent = reason(o);
+        btn.append(rk, d, why);
+        if(planPick[p.id] === o.i && !blocked){
+          const t = document.createElement("span");
+          t.className = "tag plan"; t.textContent = "whole-board pick";
+          btn.append(t);
+        }
+        btn.dataset.act = "book"; btn.dataset.id = p.id; btn.dataset.opt = o.i;
+        opts.append(btn);
+      });
+      el.append(opts);
+    }
+
+    if(editing[p.id]) el.append(dateEditor(p));
+    if(drawn) listEl.append(el);
+  }
+  const countEl = document.getElementById("search-count");
+  if(countEl) countEl.textContent = q ? shown + " of " + PROGRAMS.length : "";
+  if(q && shown === 0){
+    const none = document.createElement("div");
+    none.className = "empty-search";
+    none.textContent = "No program matches “" + q + "”.";
+    listEl.append(none);
+  }
+
+  document.getElementById("s-booked").textContent = booked;
+  document.getElementById("s-open").textContent = open;
+  document.getElementById("s-exp").textContent = exp.toFixed(1);
+  document.getElementById("s-risk").textContent = atRisk;
+
+  renderTops();
+  renderPlan(plan);
+  renderCalendar(taken, held);
+  wireAll();
+}
+
+function renderTops(){
+  const el = document.getElementById("tops");
+  el.textContent = "";
+  const chosen = PROGRAMS.filter(p => tops[p.id]).length;
+  document.getElementById("top-count").textContent = chosen ? "(" + chosen + ")" : "";
+  for(const p of [...PROGRAMS].sort((a, b) => (tops[b.id] ? 1 : 0) - (tops[a.id] ? 1 : 0) || b.p - a.p)){
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.type = "button";
+    b.setAttribute("aria-pressed", tops[p.id] ? "true" : "false");
+    b.append(p.name);
+    const pct = document.createElement("span");
+    pct.className = "pct"; pct.textContent = p.p + "%";
+    b.append(pct);
+    b.dataset.act = "top"; b.dataset.id = p.id;
+    el.append(b);
+  }
+}
+
+/* ---------- whole-board plan ----------
+   Booked days are fixed; every open program with dates is given one option so
+   that the total expected loss — pairs of programs stranded on the same day,
+   weighted by how likely each is to invite — comes out as low as possible.
+   Hill climbing from random starts: the board is small, so this settles fast. */
+function planCost(assign, openList, fixed){
+  const day = {};
+  const put = (p, days) => {
+    for(const f of footprint(p, days)) (day[f.day] = day[f.day] || []).push({id: p.id, w: f.w});
+  };
+  for(const p of PROGRAMS){
+    const st = state[p.id];
+    if(st && st.status === "booked") put(p, p.opts[st.opt]);
+  }
+  openList.forEach((p, k) => put(p, p.opts[assign[k]]));
+  let cost = 0;
+  for(const d in day){
+    const here = day[d];
+    for(let i = 0; i < here.length; i++)
+      for(let j = i+1; j < here.length; j++)
+        cost += here[i].w * here[j].w * weight(BY_ID[here[i].id]) * weight(BY_ID[here[j].id]) / 10000;
+  }
+  return cost;
+}
+let planMemo = {key:null, value:null};
+function bestPlan(){
+  const key = JSON.stringify({picks: state, dates, tops, commits});
+  if(planMemo.key === key) return planMemo.value;
+  const value = solvePlan();
+  planMemo = {key, value};
+  return value;
+}
+/* Deterministic restarts: the same board always yields the same plan, so the
+   panel never reshuffles between equally good arrangements. */
+function seeded(seed){
+  let s = 0;
+  for(let i = 0; i < seed.length; i++) s = (s * 31 + seed.charCodeAt(i)) >>> 0;
+  return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function solvePlan(){
+  const rnd = seeded(JSON.stringify({picks: state, dates, tops, commits}));
+  const fixed = bookedMap();
+  const openList = PROGRAMS.filter(p => isOpen(p) && p.opts.length > 0);
+  if(!openList.length) return {assign:[], openList, fixed, clashes: clashesOf({}, [], fixed)};
+  let best = null;
+  for(let t = 0; t < 40; t++){
+    const a = openList.map(p => t === 0 ? rank(p)[0].i : t === 1 ? 0 : Math.floor(rnd() * p.opts.length));
+    let cur = planCost(a, openList, fixed), moved = true, guard = 0;
+    while(moved && guard++ < 40){
+      moved = false;
+      for(let k = 0; k < openList.length; k++){
+        let keep = a[k];
+        for(let o = 0; o < openList[k].opts.length; o++){
+          if(o === keep) continue;
+          a[k] = o;
+          const c = planCost(a, openList, fixed);
+          if(c < cur - 1e-9){ cur = c; keep = o; moved = true; }
+          else a[k] = keep;
+        }
+      }
+    }
+    if(!best || cur < best.cost) best = {cost: cur, assign: [...a]};
+  }
+  return {assign: best.assign, openList, fixed, clashes: clashesOf(best.assign, openList, fixed)};
+}
+function clashesOf(assign, openList, fixed){
+  const day = {};
+  const put = (p, days) => {
+    for(const f of footprint(p, days)) (day[f.day] = day[f.day] || []).push({id: p.id, kind: f.kind});
+  };
+  for(const p of PROGRAMS){
+    const st = state[p.id];
+    if(st && st.status === "booked") put(p, p.opts[st.opt]);
+  }
+  openList.forEach((p, k) => put(p, p.opts[assign[k]]));
+  return Object.entries(day).filter(([, xs]) => xs.length > 1)
+    .map(([d, xs]) => ({
+      day: d,
+      ids: xs.map(x => x.id),
+      evening: xs.some(x => x.kind === "evening")
+    }))
+    .sort((a, b) => a.day < b.day ? -1 : 1);
+}
+function renderPlan(plan){
+  const el = document.getElementById("plan");
+  el.textContent = "";
+  const rows = [];
+  for(const p of PROGRAMS){
+    const s = state[p.id];
+    if(s && s.status === "booked") rows.push({p, days: p.opts[s.opt], locked: true});
+  }
+  plan.openList.forEach((p, k) => rows.push({p, days: p.opts[plan.assign[k]], locked: false}));
+  rows.sort((a, b) => a.days[0] < b.days[0] ? -1 : a.days[0] > b.days[0] ? 1 : b.p.p - a.p.p);
+
+  const clashDays = new Set(plan.clashes.flatMap(c => [c.day]));
+  const sum = document.getElementById("plan-sum");
+  const attend = rows.length;
+  const dayClashes = plan.clashes.filter(c => !c.evening).length;
+  const eveClashes = plan.clashes.length - dayClashes;
+  sum.textContent = plan.clashes.length === 0
+    ? attend + " interviews, no collisions — every program has a clear day and a clear evening."
+    : attend + " interviews · " + dayClashes + " day clash" + (dayClashes === 1 ? "" : "es")
+      + (eveClashes ? " and " + eveClashes + " evening clash" + (eveClashes === 1 ? "" : "es") : "") + " left.";
+
+  for(const r of rows){
+    const row = document.createElement("div");
+    const hit = r.days.some(d => clashDays.has(d));
+    row.className = "planrow" + (r.locked ? " locked" : "") + (hit ? " hit" : "") + (tops[r.p.id] ? " top" : "");
+    const d = document.createElement("span");
+    d.className = "d mono"; d.textContent = fmtOpt(r.days);
+    const nm = document.createElement("span");
+    nm.className = "nm"; nm.textContent = r.p.name;
+    const tag = document.createElement("span");
+    tag.className = "src";
+    tag.textContent = r.locked ? "booked" : r.p.p + "%";
+    row.append(d, nm, tag);
+    el.append(row);
+  }
+  if(!rows.length){
+    const empty = document.createElement("div");
+    empty.style.cssText = "font-size:13px;color:var(--muted)";
+    empty.textContent = "Nothing to plan yet — add dates or mark an invite.";
+    el.append(empty);
+  }
+  const waiting = PROGRAMS.filter(p => isOpen(p) && p.opts.length === 0);
+  const taken = bookedMap();
+  const stranded = PROGRAMS.filter(p => tops[p.id] && isOpen(p) && p.opts.length && freeOpts(p, taken).length === 0);
+  const note = document.getElementById("plan-note");
+  const lines = [];
+  if(stranded.length) lines.push("Top pick" + (stranded.length > 1 ? "s" : "") + " with no free day left: "
+    + stranded.map(p => p.name + " — " + p.opts.map(o => fmtOpt(o) + " is " + BY_ID[taken[o.find(d => taken[d])]].name).join(", ")).join("; ") + ".");
+  const dayC = plan.clashes.filter(c => !c.evening), eveC = plan.clashes.filter(c => c.evening);
+  if(dayC.length) lines.push("Same day: " + dayC.map(c =>
+    fmt(c.day) + " (" + c.ids.map(i => BY_ID[i].name).join(" vs ") + ")").join("; ") + ".");
+  if(eveC.length) lines.push("Evening overlaps — a dinner the night before lands on another interview day: "
+    + eveC.slice(0, 3).map(c => fmt(c.day) + " (" + c.ids.map(i => BY_ID[i].name).join("/") + ")").join("; ")
+    + (eveC.length > 3 ? " and " + (eveC.length - 3) + " more" : "")
+    + ". Fine if the two are in the same city; otherwise skip the dinner or move one.");
+  if(!plan.clashes.length && waiting.length) lines.push("Held days are still needed for " + waiting.length + " program" + (waiting.length > 1 ? "s" : "") + " without dates.");
+  note.textContent = lines.join(" ");
+}
+
+function dateEditor(p){
+  const box = document.createElement("div");
+  box.className = "editor";
+  const hd = document.createElement("div");
+  hd.className = "hd";
+  hd.textContent = dates[p.id] ? "Dates you entered" : "Predicted dates — edit to use the real ones";
+  box.append(hd);
+
+  const current = p.opts;
+  if(!current.length){
+    const empty = document.createElement("div");
+    empty.className = "hint"; empty.textContent = "Nothing on file yet.";
+    box.append(empty);
+  }
+  current.forEach((days, i) => {
+    const row = document.createElement("div");
+    row.className = "dline";
+    const d = document.createElement("span"); d.className = "d"; d.textContent = fmtOpt(days);
+    const src = document.createElement("span");
+    src.className = "src" + (dates[p.id] ? " own" : "");
+    src.textContent = dates[p.id] ? "confirmed" : "predicted";
+    const rm = document.createElement("button");
+    rm.className = "mini"; rm.textContent = "Remove";
+    rm.setAttribute("aria-label", "Remove " + fmtOpt(days) + " from " + p.name);
+    rm.dataset.act = "rm"; rm.dataset.id = p.id; rm.dataset.i = i;
+    row.append(d, src, rm);
+    box.append(row);
+  });
+
+  const row = document.createElement("div");
+  row.className = "addrow";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.id = "add-" + p.id;
+  input.placeholder = "11/13, 12/4-5, 1/9";
+  input.setAttribute("aria-label", "Dates offered by " + p.name);
+  const add = document.createElement("button");
+  add.textContent = "Add";
+  const swap = document.createElement("button");
+  swap.className = "alt";
+  swap.textContent = "Replace all";
+  const err = document.createElement("div");
+  err.className = "err";
+  err.hidden = !editMsg[p.id];
+  if(editMsg[p.id]) err.textContent = editMsg[p.id];
+  const commit = (replace) => {
+    const {ok, bad} = parseList(input.value);
+    if(!ok.length){
+      err.textContent = "Use 11/13 for one day, 12/4-5 for a block, and commas between several: 11/13, 12/4-5, 1/9.";
+      err.hidden = false;
+      return;
+    }
+    const base = replace ? [] : current;
+    const seen = new Set(base.map(o => o.join()));
+    const merged = [...base];
+    for(const o of ok) if(!seen.has(o.join())){ seen.add(o.join()); merged.push(o); }
+    merged.sort((a, b) => a[0] < b[0] ? -1 : 1);
+    input.value = "";
+    if(bad.length) editMsg[p.id] = "Couldn't read: " + bad.join(", ") + " — the rest went in.";
+    else delete editMsg[p.id];
+    setDates(p.id, merged, null);
+  };
+  add.dataset.act = "add"; add.dataset.id = p.id;
+  swap.dataset.act = "swap"; swap.dataset.id = p.id;
+  input.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); commit(false); } });
+  ADDERS[p.id] = commit;
+  row.append(input, add, swap);
+  box.append(row, err);
+
+  const hint = document.createElement("div");
+  hint.className = "hint";
+  hint.textContent = "Paste every date a program offers, separated by commas — \"Replace all\" swaps out what's on file. November and December are read as 2026, January onward as 2027.";
+  box.append(hint);
+
+  const ch = document.createElement("div");
+  ch.className = "hd";
+  ch.style.marginTop = "14px";
+  ch.textContent = "Time commitments";
+  box.append(ch);
+
+  const toggles = document.createElement("div");
+  toggles.className = "toggles";
+  const toggle = (field, on, label) => {
+    const b = document.createElement("button");
+    b.className = "chip" + (on ? " on" : "");
+    b.type = "button";
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.dataset.act = field === "pre" ? "togglepre" : "togglepost";
+    b.dataset.id = p.id;
+    b.textContent = (on ? "✓ " : "") + label;
+    return b;
+  };
+  toggles.append(toggle("pre", !!p.pre, "Dinner the evening before"));
+  toggles.append(toggle("post", !!p.post, "Commitment that evening"));
+  box.append(toggles);
+
+  const chint = document.createElement("div");
+  chint.className = "hint";
+  chint.textContent = p.pre
+    ? "The night before each date counts as booked, so nothing else can take that evening."
+    : "Turn on if the program holds a dinner or reception the night before.";
+  box.append(chint);
+
+  if(dates[p.id]){
+    const reset = document.createElement("button");
+    reset.className = "mini";
+    reset.style.marginTop = "8px";
+    reset.textContent = "Back to predicted dates";
+    reset.dataset.act = "reset"; reset.dataset.id = p.id;
+    box.append(reset);
+  }
+  return box;
+}
+
+/* Changing a program's dates keeps a booking pointed at the same day where it still exists. */
+function setDates(id, next, removedIndex){
+  const p = BY_ID[id];
+  const booked = state[id] && state[id].status === "booked" ? p.opts[state[id].opt] : null;
+  if(next === null) delete dates[id]; else dates[id] = next;
+  applyDates();
+  if(booked){
+    const still = p.opts.findIndex(o => o[0] === booked[0]);
+    if(still >= 0) state[id] = {status:"booked", opt:still};
+    else delete state[id];
+  }
+  render();
+  save();
+}
+
+function renderCalendar(taken, held){
+  const wrap = document.getElementById("calendar");
+  wrap.textContent = "";
+  const evenings = bookedEvenings();
+  const openByDay = {};
+  for(const p of PROGRAMS){
+    if(!isOpen(p)) continue;
+    for(const o of p.opts) for(const d of o) (openByDay[d] = openByDay[d] || []).push(p);
+  }
+  for(const M of monthsInPlay()){
+    const sec = document.createElement("div"); sec.className = "month";
+    const h = document.createElement("h3"); h.textContent = M.label; sec.append(h);
+    const g = document.createElement("div"); g.className = "grid";
+    for(const d of ["S","M","T","W","T","F","S"]){
+      const c = document.createElement("div"); c.className = "dow"; c.textContent = d; g.append(c);
+    }
+    const first = new Date(M.y, M.m, 1), days = new Date(M.y, M.m+1, 0).getDate();
+    for(let i = 0; i < first.getDay(); i++){
+      const c = document.createElement("div"); c.className = "cell blank"; g.append(c);
+    }
+    for(let day = 1; day <= days; day++){
+      const iso = M.y + "-" + String(M.m+1).padStart(2,"0") + "-" + String(day).padStart(2,"0");
+      const c = document.createElement("div");
+      const bookedId = taken[iso];
+      const holdP = held[iso];
+      const openHere = openByDay[iso] || [];
+      const eve = evenings[iso];
+      c.className = "cell" + (bookedId ? " bookedday" : eve ? " evening" : holdP ? " hold" : HOLIDAYS[iso] ? " holiday" : openHere.length ? " has" : "");
+      const dn = document.createElement("span"); dn.className = "dn"; dn.textContent = day; c.append(dn);
+      const who = document.createElement("span"); who.className = "who";
+      if(bookedId){
+        who.textContent = BY_ID[bookedId].name;
+        if(eve && eve.id !== bookedId) who.textContent += " + " + eve.name + " dinner";
+        else if(BY_ID[bookedId].post) who.textContent += " · evening";
+      }
+      else if(eve) who.textContent = eve.name + " dinner";
+      else if(holdP) who.textContent = "hold · " + holdP.name;
+      else if(HOLIDAYS[iso]) who.textContent = HOLIDAYS[iso];
+      else if(openHere.length) who.textContent = openHere.slice(0,3).map(p => p.name).join(", ") + (openHere.length > 3 ? " +" + (openHere.length-3) : "");
+      c.append(who);
+      c.title = (bookedId ? "Booked: " + BY_ID[bookedId].name + (BY_ID[bookedId].post ? " — " + BY_ID[bookedId].post + " that evening" : "")
+        : openHere.map(p => p.name + " " + p.p + "%").join(" · ")) || "";
+      g.append(c);
+    }
+    sec.append(g); wrap.append(sec);
+  }
+  const leg = document.createElement("div");
+  leg.className = "legend";
+  const items = [["var(--ok-soft)","Booked"],["var(--warn-soft)","Evening commitment"],["var(--crit-soft)","Hold — someone's last date"],["var(--surface)","Offered by an open program"],["var(--accent-soft)","Holiday"]];
+  for(const [bg, label] of items){
+    const s = document.createElement("span");
+    s.innerHTML = '<span class="swatch" style="background:' + bg + '"></span>';
+    s.append(label); leg.append(s);
+  }
+  wrap.append(leg);
+}
+
+/* ---------- input handling ----------
+   Some hosts stop click events before they bubble, so every listener runs in the
+   CAPTURE phase, and a pointer/touch fallback fires the same action if no click
+   follows. `taps` and `acts` below are on screen: if taps climbs and acts does
+   not, the event is arriving but the action is failing. */
+const ADDERS = {};
+const metrics = {taps:0, clicks:0, acts:0};
+let lastAct = 0, lastActEl = null;
+
+function doAct(el){
+  const id = el.dataset.id;
+  metrics.acts++;
+  paintMetrics();
+  try{
+    switch(el.dataset.act){
+      case "book":   setStatus(id, {status:"booked", opt: +el.dataset.opt}); break;
+      case "out":    setStatus(id, {status:"out"}); break;
+      case "reopen": setStatus(id, null); break;
+      case "edit":   editing[id] = !editing[id]; if(!editing[id]) delete editMsg[id]; render(); break;
+      case "top":    if(tops[id]) delete tops[id]; else tops[id] = true; render(); save(); break;
+      case "rm":     setDates(id, BY_ID[id].opts.filter((_, j) => j !== +el.dataset.i), null); break;
+      case "add":    if(ADDERS[id]) ADDERS[id](false); break;
+      case "swap":   if(ADDERS[id]) ADDERS[id](true); break;
+      case "reset":  setDates(id, null, null); break;
+      case "togglepre":  setCommit(id, "pre",  !BY_ID[id].pre);  break;
+      case "togglepost": setCommit(id, "post", !BY_ID[id].post); break;
+      case "signin":  signIn(); break;
+      case "signout": firebase.auth().signOut(); break;
+      case "diag":   document.getElementById("metrics").hidden = true; break;
+    }
+  }catch(err){ showTrouble(err && err.message ? err.message : String(err)); }
+}
+function handle(e, kind){
+  const t = e.target;
+  const el = t && t.closest ? t.closest("[data-act]") : null;
+  metrics.taps++;
+  if(kind === "click") metrics.clicks++;
+  paintMetrics();
+  if(!el || el.disabled) return;
+  if(el === lastActEl && Date.now() - lastAct < 400) return;   // one action per gesture
+  lastAct = Date.now(); lastActEl = el;
+  doAct(el);
+}
+for(const kind of ["click", "pointerup", "touchend"]){
+  document.addEventListener(kind, e => handle(e, kind === "click" ? "click" : "pointer"), true);
+}
+/* The counters stay out of the way unless taps are arriving and doing nothing —
+   then they surface on their own, which is the state worth seeing. */
+/* Direct handlers too — same dedupe guard, so whichever path the host allows
+   through fires the action exactly once. */
+function wireAll(){
+  for(const el of document.querySelectorAll("[data-act]")){
+    if(el.dataset.wired) continue;
+    el.dataset.wired = "1";
+    el.onpointerup = e => handle(e, "pointer");
+    el.ontouchend  = e => handle(e, "pointer");
+    el.onclick     = e => handle(e, "click");
+    el.onkeydown   = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); handle(e, "click"); } };
+  }
+}
+(function wireSearch(){
+  const el = document.getElementById("search");
+  if(!el) return;
+  el.addEventListener("input", () => render());
+  el.addEventListener("keydown", e => { if(e.key === "Escape"){ el.value = ""; render(); } });
+})();
+function paintMetrics(){
+  const el = document.getElementById("metrics");
+  if(!el) return;
+  if(metrics.taps >= 3 && metrics.acts === 0) el.hidden = false;
+  if(!el.hidden) el.textContent = "taps " + metrics.taps + " · clicks " + metrics.clicks + " · actions " + metrics.acts;
+}
+function showTrouble(msg){
+  const el = document.getElementById("diag");
+  if(el) el.textContent = "Something went wrong: " + msg;
+}
+window.addEventListener("error", e => showTrouble(e.message));
+window.addEventListener("unhandledrejection", e => showTrouble((e.reason && e.reason.message) || String(e.reason)));
+
+/* ---------- persistence ---------- */
+function setStatus(id, val){
+  if(val === null) delete state[id]; else state[id] = val;
+  render();
+  save();
+}
+function save(){
+  try{ localStorage.setItem("nsgy-schedule", JSON.stringify({picks: state, dates, tops, commits})); }catch(e){}
+  pending = true;
+  if(!fsdoc) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const body = JSON.stringify({picks: state, dates, tops, commits});
+    if(body === lastSaved) return;
+    const el = document.getElementById("saving");
+    try{
+      await db.doc("schedule/state").set({picks: state, dates, tops, commits, updated: new Date().toISOString()});
+      lastSaved = body;
+      if(body === JSON.stringify({picks: state, dates, tops, commits})) pending = false;
+      el.textContent = "saved";
+      setTimeout(() => { if(el.textContent === "saved") el.textContent = ""; }, 2200);
+    }catch(e){
+      el.textContent = "not saved";
+    }
+  }, 350);
+}
+function adopt(doc){
+  state = (doc && doc.picks) || {};
+  dates = (doc && doc.dates) || {};
+  tops = (doc && doc.tops) || {};
+  commits = (doc && doc.commits) || {};
+  applyDates();
+}
+try{
+  const raw = localStorage.getItem("nsgy-schedule");
+  if(raw){
+    const saved = JSON.parse(raw);
+    adopt(saved && saved.picks ? saved : {picks: saved});   // older saves held picks alone
+  }
+}catch(e){ state = {}; dates = {}; tops = {}; commits = {}; }
+applyDates();
+render();
+
+/* ---------- cloud sync (Firebase) ----------
+   Project: nsgyinterviews. The apiKey is a public client identifier, not a
+   secret — access is controlled by the Firestore rule on /boards/{uid}. */
+const FIREBASE_CONFIG = {
+  apiKey:     "AIzaSyB-1tUUWAAICJG6O6FiOuVbWk8FLORgRqI",
+  authDomain: "nsgyinterviews.firebaseapp.com",
+  projectId:  "nsgyinterviews"
+};
+
+let fsdoc = null, account = "";
+
+/* Leave blank to let any signed-in Google account through the gate. Put your own
+   address here to turn it away — but remember this file is public, so treat the
+   gate as a courtesy lock, not security. Your DATA is protected by the Firestore
+   rule either way. */
+const ALLOWED_EMAIL = "";
+
+function lock(msg){
+  const g = document.getElementById("gate"), app = document.getElementById("app"), st = document.getElementById("app-stats");
+  if(g) g.hidden = false;
+  if(app) app.hidden = true;
+  if(st) st.hidden = true;
+  const m = document.getElementById("gate-msg");
+  if(m) m.textContent = msg || "";
+}
+function unlock(){
+  const g = document.getElementById("gate"), app = document.getElementById("app"), st = document.getElementById("app-stats");
+  if(g) g.hidden = true;
+  if(app) app.hidden = false;
+  if(st) st.hidden = false;
+}
+function configured(){
+  return !!FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf("PASTE") === -1 && typeof firebase !== "undefined";
+}
+function hasLocalWork(){
+  return Object.keys(state).length > 0 || Object.keys(dates).length > 0 || Object.keys(tops).length > 0;
+}
+function setSync(kind, msg){
+  const el = document.getElementById("sync");
+  if(!el) return;
+  el.textContent = "";
+  const button = (label, act) => {
+    const b = document.createElement("button");
+    b.className = "mini"; b.textContent = label; b.dataset.act = act;
+    return b;
+  };
+  if(kind === "on"){
+    el.append("Synced to " + account + ". ");
+    el.append(button("Sign out", "signout"));
+    return;
+  }
+  if(kind === "signin"){
+    el.append(msg || "Saving in this browser only. ");
+    el.append(button("Sign in to sync across devices", "signin"));
+    return;
+  }
+  el.textContent = msg || "";
+}
+async function connect(){
+  if(!configured()){
+    unlock();   /* no Firebase yet: the tool stays usable, saving in this browser */
+    setSync("offline", "Saving in this browser. Add your Firebase config to sync across devices.");
+    return;
+  }
+  lock();
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.auth().onAuthStateChanged(async user => {
+      if(!user){ fsdoc = null; account = ""; lock(); setSync("signin"); return; }
+      if(ALLOWED_EMAIL && user.email !== ALLOWED_EMAIL){
+        lock("Signed in as " + user.email + ", which can't open this board. Sign out and use the right account.");
+        setSync("signin", "Wrong account. ");
+        return;
+      }
+      account = user.email || "your account";
+      unlock();
+      setSync("on");
+      fsdoc = firebase.firestore().collection("boards").doc(user.uid);
+      try{
+        const snap = await fsdoc.get();
+        if(snap.exists && snap.data() && !pending){
+          adopt(snap.data());
+          lastSaved = JSON.stringify({picks: state, dates, tops});
+          render();
+        } else if(!snap.exists && hasLocalWork()){
+          /* First sign-in on a browser that already has a board: keep that work. */
+          pending = true; save();
+        }
+        if(pending) save();
+        fsdoc.onSnapshot(s => {
+          if(!s.exists || pending || s.metadata.hasPendingWrites) return;
+          const doc = s.data();
+          const body = JSON.stringify({picks: doc.picks || {}, dates: doc.dates || {}, tops: doc.tops || {}});
+          if(body === JSON.stringify({picks: state, dates, tops})) return;
+          adopt(doc); lastSaved = body; render();
+        });
+      }catch(e){ setSync("signin", "Couldn't read your saved board (" + (e.code || e.message) + "). "); }
+    });
+  }catch(e){
+    unlock();
+    setSync("offline", "Sync unavailable (" + (e.code || e.message) + "). Saving in this browser.");
+  }
+}
+async function signIn(){
+  try{
+    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  }catch(e){
+    if(e && e.code === "auth/popup-blocked") firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+    else { lock("Sign-in failed (" + (e.code || e.message) + ")."); setSync("signin", "Sign-in failed. "); }
+  }
+}
+connect();
+</script>
+
+</body>
+</html>
