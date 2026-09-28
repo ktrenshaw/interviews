@@ -155,6 +155,7 @@ button.mini:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .cell.bookedday{background:var(--ok-soft); border-color:var(--ok)}
 .cell.bookedday .dn{color:var(--ok)}
 .cell.evening{background:var(--warn-soft); border-color:var(--warn); border-style:dashed}
+.cell.evening.full{border-style:solid}
 .cell.evening .dn{color:var(--warn)}
 .cell.evening .who{color:var(--warn)}
 .cell.hold{background:var(--crit-soft); border-color:var(--crit)}
@@ -223,9 +224,9 @@ footer{margin-top:24px; font-size:12px; color:var(--faint); border-top:1px solid
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow">Neurosurgery 2026–27 · predicted dates</div>
+      <div class="eyebrow">Neurosurgery 2026–27 · confirmed dates, 9/21/26</div>
       <h1>Interview Booking Rules</h1>
-      <p>Tap the date you're offered when an invite lands. Every other program's recommendation re-ranks around what you've already booked, so the next decision is always on screen. Dates are last cycle's, shifted a day — replace any of them with the real ones as programs post them.</p>
+      <p>Tap the date you're offered when an invite lands. Every other program's recommendation re-ranks around what you've already booked, so the next decision is always on screen. Dates are the confirmed 2026–27 dates as of 9/21/26. Correct any that change, and add the ones still missing.</p>
     </div>
     <div class="stats" id="app-stats">
       <div class="stat"><span class="n" id="s-booked">0</span><span class="l">Booked</span></div>
@@ -289,9 +290,9 @@ footer{margin-top:24px; font-size:12px; color:var(--faint); border-top:1px solid
         <div class="rules">
           <ol>
             <li><strong>Book the day the invite arrives.</strong> Slots go first-come, and a date you hesitate on is usually the one that disappears.</li>
-            <li><strong>Protect the single-date programs.</strong> Penn (Thu 1/7) and Tennessee (Mon 11/16) cannot move. Nothing else gets booked on those days while they're still open.</li>
+            <li><strong>Protect the scarce programs.</strong> Miami offers one date, and several others offer two. The Squeezed panel names whoever is down to their last free day.</li>
             <li><strong>Move the flexible program, not the scarce one.</strong> If two collide, keep the program with fewer remaining dates and ask the other for its alternate — that request is routine in the first week.</li>
-            <li><strong>Keep a buffer.</strong> Leave two open days a month for Vermont, Wake Forest, Georgetown and GW until their dates post.</li>
+            <li><strong>Keep a buffer.</strong> Pitt, Carolinas, VCU, Georgetown, GW and Rutgers have no dates yet — leave room for them.</li>
             <li><strong>Watch the evening before.</strong> Most programs hold a dinner the night before, so a same-city back-to-back is fine and a cross-country one is not.</li>
             <li><strong>Decline early, not late.</strong> Below about 20% likelihood, take the interview only if the day is still free.</li>
           </ol>
@@ -303,7 +304,7 @@ footer{margin-top:24px; font-size:12px; color:var(--faint); border-top:1px solid
   <footer>
     <div id="sync" style="margin-bottom:6px"></div>
     <div id="diag" style="color:var(--crit); margin-bottom:6px"></div>
-    Dates are predictions: last cycle's dates shifted back one day, which holds the weekday and the position relative to Thanksgiving. Replace a prediction with a real date as each program posts it — the ranking logic doesn't depend on the dates being right, only on which days collide.
+    Dates come from the AANS 2026–2027 interview date sheet dated 9/21/26. Programs without dates there, and any that change later, are yours to enter — the ranking logic doesn't depend on where a date came from, only on which days collide.
   </footer>
 </div>
 
@@ -312,49 +313,49 @@ footer{margin-top:24px; font-size:12px; color:var(--faint); border-top:1px solid
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script>
 const PROGRAMS = [
-  {id:"tufts", name:"Tufts", p:95, note:"Home program. Four dates — the easiest thing on the board to move.", opts:[["2026-12-03"],["2026-12-10"],["2027-01-07"],["2027-01-14"]]},
-  {id:"utah", pre:"Dinner with residents", name:"Utah", p:87, note:"Dinner Wednesday evening, interviews Thursday. Arrive the day before.", opts:[["2026-11-05"],["2026-11-12"]]},
-  {id:"dartmouth", pre:"Dinner with residents", name:"Dartmouth", p:72, note:"Dinner with residents the evening before.", opts:[["2026-11-06"],["2026-11-13"],["2026-12-18"]]},
-  {id:"wvu", pre:"Dinner + complimentary housing", name:"West Virginia", p:65, note:"Dinner and housing the night before. Dates read \"3, 10, 14\" in the source — verify.", opts:[["2026-11-02"],["2026-11-09"],["2026-11-13"]]},
-  {id:"mgb", post:"Dinner that evening", name:"MGB", p:62, note:"Full day, dinner that evening.", opts:[["2027-01-05"],["2027-01-06"]]},
-  {id:"bidmc", pre:"Dinner, 7–9 pm", name:"Beth Israel", p:62, note:"Dinner the night before, 7–9 pm.", opts:[["2026-11-13"],["2026-12-09"],["2026-12-17"]]},
-  {id:"jefferson", pre:"Dinner with residents", name:"Thomas Jefferson", p:60, note:"Saturday interviews, dinner the Friday evening before.", opts:[["2026-11-07"],["2026-12-05"],["2027-01-09"]]},
-  {id:"vcu", name:"VCU", p:60, note:"Two-day block: dinner the first evening, interviews the next day.", opts:[["2026-12-01","2026-12-02"],["2026-12-07","2026-12-08"],["2026-12-13","2026-12-14"]]},
-  {id:"maryland", pre:"Dinner with residents", name:"Maryland", p:57, note:"Dinner with residents the evening before.", opts:[["2026-11-06"],["2026-12-04"],["2026-12-18"]]},
-  {id:"einstein", name:"Albert Einstein", p:57, note:"Listed as Montefiore. No evening events noted.", opts:[["2026-11-13"],["2026-12-11"],["2027-01-08"]]},
-  {id:"inova", pre:"Dinner with residents", name:"Inova", p:55, note:"Dinner with residents the night before.", opts:[["2026-11-10"],["2026-12-01"]]},
-  {id:"uva", post:"Dinner at the Chair's", name:"UVA", p:52, note:"Two days: happy hour the evening before, dinner at the Chair's at the end.", opts:[["2026-11-18","2026-11-19"],["2026-12-09","2026-12-10"],["2027-01-13","2027-01-14"]]},
-  {id:"colorado", pre:"Faculty lectures + dinner", post:"Closing reception", name:"Colorado", p:52, note:"Lectures and dinner the evening before; housing covered Thursday and Friday.", opts:[["2026-11-06"],["2026-12-04"],["2027-01-08"]]},
-  {id:"unc", pre:"Dinner with residents", name:"UNC", p:52, note:"Dinner with residents the Tuesday evening before. December date unreadable in the source.", opts:[["2026-11-04"],["2026-11-11"]]},
-  {id:"carolinas", pre:"Optional dinner", name:"Carolinas", p:52, note:"Optional dinner the night before.", opts:[["2026-11-07"],["2026-12-05"]]},
-  {id:"pitt", pre:"Dinner with residents", post:"Dinner with residents + faculty", name:"Pitt", p:47, note:"Dinner the evening before AND the night of — plan two nights.", opts:[["2026-11-02"],["2026-12-11"],["2027-01-15"]]},
-  {id:"emory", pre:"Dinner + site tour", name:"Emory", p:47, note:"Dinner and site tour the evening before.", opts:[["2027-01-09"],["2027-01-10"]]},
-  {id:"tennessee", pre:"Dinner with residents", post:"Optional lab that evening", name:"Tennessee", p:47, note:"Only one date. Dinner Sunday evening, interviews all day Monday, optional lab that evening.", opts:[["2026-11-16"]]},
-  {id:"michigan", pre:"Dinner with residents", name:"Michigan", p:42, note:"Five dates — the most flexible program on the list. Dinner the evening before.", opts:[["2026-11-05"],["2026-11-10"],["2026-11-30"],["2026-12-11"],["2027-01-11"]]},
-  {id:"uw", name:"U Washington", p:37, note:"Two days: presentations, tour and dinner on day 1; interviews day 2 morning.", opts:[["2026-11-20","2026-11-21"],["2027-01-08","2027-01-09"]]},
-  {id:"penn", post:"Dinner on the interview day", name:"Penn", p:37, note:"Only one date. Dinner is on the interview day itself. Nov/Dec dates unreadable in the source.", opts:[["2027-01-07"]]},
-  {id:"duke", post:"Dinner the evening after", name:"Duke", p:37, note:"Paired dates; dinner the evening after the interview day.", opts:[["2026-11-13","2026-11-14"],["2026-12-04","2026-12-05"]]},
-  {id:"umass", pre:"Meet-and-greet + dinner", name:"UMass", p:19, note:"Meet-and-greet, research talks and dinner the evening before.", opts:[["2026-11-17"],["2026-12-02"],["2026-12-10"]]},
-  {id:"brown", pre:"Welcome dinner", name:"Brown", p:16, note:"Welcome dinner the evening before; morning and afternoon groups.", opts:[["2026-11-02"],["2026-11-10"]]},
-  {id:"uconn", name:"UConn", p:15, note:"Virtual interviews — no travel. Second Look visits are separate.", opts:[["2026-11-05"],["2026-12-03"],["2027-01-09"],["2027-01-23"]]},
-  {id:"albany", pre:"Meet-and-greet dinner", name:"Albany", p:13, note:"Meet-and-greet dinner the night before.", opts:[["2026-11-09"],["2026-12-09"]]},
-  {id:"geisinger", pre:"Dinner with residents", name:"Geisinger", p:12, note:"Dinner with residents the evening prior.", opts:[["2026-11-03"],["2026-11-20"]]},
-  {id:"miami", pre:"Dinner with faculty + residents", name:"Miami", p:10, note:"Dinner with faculty and residents the evening before.", opts:[["2026-11-07"],["2026-11-21"]]},
-  {id:"stanford", pre:"Informal dinner", name:"Stanford", p:9, note:"Informal dinner the evening before; full day with campus tour.", opts:[["2026-11-14"],["2026-12-12"],["2027-01-22"]]},
-  {id:"uchicago", pre:"Dinner with residents", name:"UChicago", p:9, note:"Dinner with residents the evening before.", opts:[["2026-11-11"],["2026-12-02"]]},
-  {id:"vermont", name:"Vermont", p:67, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
-  {id:"wake", name:"Wake Forest", p:60, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
-  {id:"georgetown", name:"Georgetown", p:60, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
-  {id:"gwu", name:"George Washington", p:60, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
-  {id:"maine", name:"Maine Medical Center", p:15, note:"Not in last cycle's sheet — add dates when they post.", opts:[]},
-  {id:"rutgers", name:"Rutgers", p:11, note:"No dates in last cycle's sheet — add them when they post.", opts:[]},
-  {id:"yale", name:"Yale", p:11, note:"No dates listed; dinner with residents and Grand Rounds.", opts:[]}
+  {id:"tufts", pre:"Dinner with residents", name:"Tufts", p:95, note:"Home program. Dinner the evening before.", opts:[["2026-11-12"], ["2026-12-10"], ["2027-01-14"]]},
+  {id:"utah", pre:"Dinner with residents", name:"Utah", p:87, note:"October 28 and December 2 are confirmed. The November date is unreadable in the sheet — ask and add it.", opts:[["2026-10-28"], ["2026-12-02"]]},
+  {id:"dartmouth", pre:"Dinner with residents", name:"Dartmouth", p:72, note:"Dinner with residents the evening before.", opts:[["2026-11-06"], ["2026-11-20"], ["2026-12-18"]]},
+  {id:"vermont", pre:"Dinner with residents", name:"Vermont", p:67, note:"Dinner the evening before with residents.", opts:[["2026-11-05"], ["2026-12-10"], ["2027-01-07"]]},
+  {id:"wvu", pre:"Dinner + hotel provided", name:"West Virginia", p:65, note:"Four November dates. Dinner the night before and hotel provided.", opts:[["2026-11-09"], ["2026-11-13"], ["2026-11-16"], ["2026-11-20"]]},
+  {id:"mgb", post:"Dinner with residents", name:"MGB", p:62, note:"Dinner the night OF interviews, residents only — no evening-before commitment.", opts:[["2027-01-05"], ["2027-01-06"]]},
+  {id:"bidmc", pre:"Dinner with residents", name:"Beth Israel", p:62, note:"Dinner with residents the evening before.", opts:[["2026-11-13"], ["2026-12-09"], ["2026-12-17"]]},
+  {id:"jefferson", pre:"Dinner with residents", name:"Thomas Jefferson", p:60, note:"Dinner with residents Friday evening. Interviews 8 am–3 pm Saturday, with breakfast, lunch and a campus tour.", opts:[["2026-11-07"], ["2026-12-12"], ["2027-01-09"]]},
+  {id:"vcu", name:"VCU", p:60, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
+  {id:"wake", pre:"Dinner, 6:30 pm", post:"Optional city tour", name:"Wake Forest", p:60, note:"Dinner the evening before at 6:30 pm. Interview day 7:30 am–1:30 pm, optional city tour after.", opts:[["2026-10-27"], ["2026-11-10"], ["2026-12-08"]]},
+  {id:"georgetown", name:"Georgetown", p:60, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
+  {id:"gwu", name:"George Washington", p:60, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
+  {id:"maryland", pre:"Dinner with residents", name:"Maryland", p:57, note:"Dinner the evening before.", opts:[["2026-12-18"], ["2027-01-08"], ["2027-01-22"]]},
+  {id:"einstein", pre:"Dinner with residents", name:"Albert Einstein", p:57, note:"Listed as Montefiore. Dinner with residents the evening before.", opts:[["2026-11-06"], ["2026-12-04"], ["2026-12-11"], ["2027-01-08"]]},
+  {id:"inova", pre:"Dinner with residents", name:"Inova", p:55, note:"Dinner the evening before with residents.", opts:[["2026-11-10"], ["2026-12-01"]]},
+  {id:"uva", pre:"Meet and greet with residents", post:"Dinner at the PD's home", name:"UVA", p:52, note:"Meet and greet the evening before with residents; dinner at the PD's home the evening of interviews; neuroanatomy lab and city tour.", opts:[["2026-11-06"], ["2026-12-11"], ["2027-01-08"]]},
+  {id:"colorado", pre:"Presentation + dinner", post:"Cocktails and dinner", name:"Colorado", p:52, note:"Presentation and dinner with residents the Thursday evening before; Friday interviews 7:30–3:00, campus tour, then cocktails at the Chair's home and dinner in Cherry Creek.", opts:[["2026-11-13"], ["2026-12-11"], ["2027-01-08"]]},
+  {id:"unc", pre:"Dinner with residents", name:"UNC", p:52, note:"Dinner the evening before with residents.", opts:[["2026-12-09"], ["2026-12-16"], ["2027-01-13"]]},
+  {id:"carolinas", name:"Carolinas", p:52, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
+  {id:"pitt", name:"Pitt", p:47, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
+  {id:"emory", pre:"Tours + dinner", name:"Emory", p:47, note:"Two-day visit, Jan 23–24. Hospital site tours and dinner with residents the evenings of Jan 22 and 23.", opts:[["2027-01-23", "2027-01-24"]]},
+  {id:"tennessee", pre:"Welcome dinner", post:"Optional lab", name:"Tennessee", p:47, note:"Welcome dinner the night before (Sunday). Interviews 7:30 am–2:30 pm Monday, then a city and hospital tour. Optional lab Monday night.", opts:[["2026-11-09"], ["2026-12-07"]]},
+  {id:"michigan", pre:"Dinner with residents", name:"Michigan", p:42, note:"Five dates. Dinner the evening before. Note 11/23 is Thanksgiving week.", opts:[["2026-11-11"], ["2026-11-23"], ["2026-12-01"], ["2026-12-11"], ["2027-01-12"]]},
+  {id:"uw", pre:"City tour, museum, simulation lab, dinner", preFull:true, name:"U Washington", p:37, note:"The whole day before is theirs: city tour, museum, surgical simulation lab and dinner with residents. Two full days.", opts:[["2026-11-07"], ["2026-12-12"]]},
+  {id:"penn", post:"Dinner after interviews", name:"Penn", p:37, note:"Full one-day interview, 7 am–5 pm, with dinner to follow.", opts:[["2026-10-29"], ["2026-11-19"], ["2027-01-07"]]},
+  {id:"duke", post:"Dinner the evening after (last cycle — confirm)", name:"Duke", p:37, note:"The sheet lists no evening events this year; last cycle it was dinner the evening AFTER the interview day, carried over here — confirm with the program.", opts:[["2026-11-14"], ["2026-12-12"]]},
+  {id:"umass", pre:"Meet and greet + dinner", name:"UMass", p:19, note:"Meet and greet with faculty and residents the evening before, then dinner with residents.", opts:[["2026-11-17"], ["2026-12-02"], ["2026-12-10"]]},
+  {id:"brown", pre:"Dinner with residents", name:"Brown", p:16, note:"Dinner the evening before with residents.", opts:[["2026-12-01"], ["2026-12-07"]]},
+  {id:"uconn", pre:"Dinner with residents", name:"UConn", p:15, note:"In person this cycle. Dinner the evening before; interview days split between interviews and site tours. The January date is only if needed.", opts:[["2026-11-05"], ["2026-11-12"], ["2026-12-03"], ["2026-12-10"], ["2027-01-14"]]},
+  {id:"maine", extras:["2027-02-09"], name:"Maine Medical Center", p:15, note:"Virtual interviews. Second Look / Open House on Tuesday, February 9, 2027 — held as a commitment on the calendar.", opts:[["2026-12-14"], ["2027-01-07"]]},
+  {id:"albany", pre:"Dinner with residents", name:"Albany", p:13, note:"Dinner with residents the evening before.", opts:[["2026-11-16"], ["2026-12-02"]]},
+  {id:"geisinger", pre:"Dinner with residents", name:"Geisinger", p:12, note:"Dinner the evening prior with residents.", opts:[["2026-11-12"], ["2026-11-20"], ["2026-12-04"]]},
+  {id:"rutgers", name:"Rutgers", p:11, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
+  {id:"yale", post:"Dinner on day one", name:"Yale", p:11, note:"Two-day visits. Dinner with residents on the first day.", opts:[["2026-11-19", "2026-11-20"], ["2026-12-03", "2026-12-04"], ["2026-12-17", "2026-12-18"], ["2027-01-07", "2027-01-08"]]},
+  {id:"miami", pre:"Dinner with residents + faculty", name:"Miami", p:10, note:"Dinner the evening before with residents and faculty.", opts:[["2026-10-17"], ["2026-11-14"]]},
+  {id:"uchicago", pre:"Dinner with residents", name:"UChicago", p:9, note:"Dinner with residents the evening before.", opts:[["2026-10-28"], ["2026-12-02"], ["2026-12-09"]]},
+  {id:"stanford", pre:"Dinner with residents", name:"Stanford", p:9, note:"Dinner the evening before. Interview day includes breakfast, lunch and a campus tour, ending by 2:30 pm.", opts:[["2026-11-06"], ["2026-12-05"], ["2027-01-09"]]}
 ];
 const PREDICTED = Object.fromEntries(PROGRAMS.map(p => [p.id, p.opts]));
 const PRE0  = Object.fromEntries(PROGRAMS.map(p => [p.id, p.pre  || null]));
 const POST0 = Object.fromEntries(PROGRAMS.map(p => [p.id, p.post || null]));
 const HOLIDAYS = {"2026-11-26":"Thanksgiving","2026-11-27":"Holiday","2026-12-24":"Christmas Eve","2026-12-25":"Christmas","2026-12-31":"New Year's Eve","2027-01-01":"New Year's Day","2027-01-18":"MLK Day"};
-const BASE_MONTHS = ["2026-11","2026-12","2027-01"];
+const BASE_MONTHS = ["2026-10","2026-11","2026-12","2027-01"];
 const BY_ID = Object.fromEntries(PROGRAMS.map(p => [p.id, p]));
 
 /* ---------- state ---------- */
@@ -389,7 +390,10 @@ function setCommit(id, field, on){
 }
 function monthsInPlay(){
   const set = new Set(BASE_MONTHS);
-  for(const p of PROGRAMS) for(const o of p.opts) for(const d of o) set.add(d.slice(0,7));
+  for(const p of PROGRAMS){
+    for(const o of p.opts) for(const d of o) set.add(d.slice(0,7));
+    if(state[p.id] && state[p.id].status === "booked") for(const x of (p.extras || [])) set.add(x.slice(0,7));
+  }
   return [...set].sort().map(key => {
     const [y, m] = key.split("-").map(Number);
     return {y, m: m-1, label: new Date(y, m-1, 1).toLocaleDateString("en-US",{month:"long", year:"numeric"})};
@@ -458,7 +462,9 @@ function shift(d, n){ const x = parse(d); x.setDate(x.getDate()+n); return x.toI
    evening commitment. */
 function footprint(p, days){
   const f = days.map(d => ({day: d, w: 1, kind: "interview"}));
-  if(p.pre) f.unshift({day: shift(days[0], -1), w: 0.6, kind: "evening"});
+  /* preFull: the day before is a full programme, not just a dinner. */
+  if(p.pre) f.unshift({day: shift(days[0], -1), w: p.preFull ? 1 : 0.6, kind: p.preFull ? "daybefore" : "evening"});
+  for(const x of (p.extras || [])) f.push({day: x, w: 1, kind: "extra"});
   return f;
 }
 function eveningDay(p, days){ return p.pre ? shift(days[0], -1) : null; }
@@ -475,7 +481,9 @@ function bookedEvenings(){
   const m = {};
   for(const p of PROGRAMS){
     const st = state[p.id];
-    if(st && st.status === "booked" && p.pre) m[shift(p.opts[st.opt][0], -1)] = p;
+    if(!st || st.status !== "booked") continue;
+    if(p.pre) m[shift(p.opts[st.opt][0], -1)] = {p, kind: p.preFull ? "daybefore" : "evening"};
+    for(const x of (p.extras || [])) m[x] = {p, kind: "extra"};
   }
   return m;
 }
@@ -513,11 +521,16 @@ function eveningClashes(prog, oi, taken){
   const mine = prog.opts[oi];
   const myEve = eveningDay(prog, mine);
   if(myEve && taken[myEve] && taken[myEve] !== prog.id){
-    out.push({prog: BY_ID[taken[myEve]], why: "your dinner the night before falls on their interview day"});
+    out.push({prog: BY_ID[taken[myEve]], why: prog.preFull
+      ? "their interview day is the day this programme expects you the whole day before"
+      : "your dinner the night before falls on their interview day"});
   }
   for(const d of mine){
     const other = evenings[d];
-    if(other && other.id !== prog.id) out.push({prog: other, why: "their dinner that evening falls on your interview day"});
+    if(other && other.p.id !== prog.id) out.push({prog: other.p, why: other.kind === "extra"
+      ? "their second look falls on your interview day"
+      : other.kind === "daybefore" ? "they need you the whole of that day already"
+      : "their dinner that evening falls on your interview day"});
   }
   return out;
 }
@@ -641,8 +654,9 @@ function render(){
       const note = document.createElement("span");
       note.style.cssText = "font-size:12.5px;color:var(--muted)";
       const bits = [];
-      if(p.pre) bits.push("arrive " + fmt(shift(p.opts[s.opt][0], -1)) + " — " + p.pre.toLowerCase());
-      if(p.post) bits.push(p.post.toLowerCase() + " after");
+      if(p.pre) bits.push((p.preFull ? "full day " : "arrive ") + fmt(shift(p.opts[s.opt][0], -1)) + " — " + p.pre.toLowerCase());
+      if(p.post) bits.push(p.post.toLowerCase() + " that evening");
+      for(const x of (p.extras || [])) bits.push("second look " + fmt(x));
       note.textContent = bits.length ? bits.join("; ") : p.note;
       line.append(note);
       el.append(line);
@@ -697,8 +711,9 @@ function render(){
         const c = document.createElement("div");
         c.className = "commit";
         const parts = [];
-        if(p.pre) parts.push("Evening before: " + p.pre);
+        if(p.pre) parts.push((p.preFull ? "Whole day before: " : "Evening before: ") + p.pre);
         if(p.post) parts.push("That evening: " + p.post);
+        for(const x of (p.extras || [])) parts.push("Also " + fmt(x));
         if(commits[p.id]) parts.push("(yours)");
         c.textContent = parts.join(" · ");
         el.append(c);
@@ -1030,7 +1045,7 @@ function dateEditor(p){
   box.className = "editor";
   const hd = document.createElement("div");
   hd.className = "hd";
-  hd.textContent = dates[p.id] ? "Dates you entered" : "Predicted dates — edit to use the real ones";
+  hd.textContent = dates[p.id] ? "Dates you entered" : "Dates from the 9/21/26 sheet — edit if they change";
   box.append(hd);
 
   const current = p.opts;
@@ -1045,7 +1060,7 @@ function dateEditor(p){
     const d = document.createElement("span"); d.className = "d"; d.textContent = fmtOpt(days);
     const src = document.createElement("span");
     src.className = "src" + (dates[p.id] ? " own" : "");
-    src.textContent = dates[p.id] ? "confirmed" : "predicted";
+    src.textContent = dates[p.id] ? "yours" : "from sheet";
     const rm = document.createElement("button");
     rm.className = "mini"; rm.textContent = "Remove";
     rm.setAttribute("aria-label", "Remove " + fmtOpt(days) + " from " + p.name);
@@ -1132,7 +1147,7 @@ function dateEditor(p){
     const reset = document.createElement("button");
     reset.className = "mini";
     reset.style.marginTop = "8px";
-    reset.textContent = "Back to predicted dates";
+    reset.textContent = "Back to the sheet\u2019s dates";
     reset.dataset.act = "reset"; reset.dataset.id = p.id;
     box.append(reset);
   }
@@ -1181,15 +1196,15 @@ function renderCalendar(taken, held){
       const holdP = held[iso];
       const openHere = openByDay[iso] || [];
       const eve = evenings[iso];
-      c.className = "cell" + (bookedId ? " bookedday" : eve ? " evening" : holdP ? " hold" : HOLIDAYS[iso] ? " holiday" : openHere.length ? " has" : "");
+      c.className = "cell" + (bookedId ? " bookedday" : eve ? (eve.kind === "evening" ? " evening" : " evening full") : holdP ? " hold" : HOLIDAYS[iso] ? " holiday" : openHere.length ? " has" : "");
       const dn = document.createElement("span"); dn.className = "dn"; dn.textContent = day; c.append(dn);
       const who = document.createElement("span"); who.className = "who";
       if(bookedId){
         who.textContent = BY_ID[bookedId].name;
-        if(eve && eve.id !== bookedId) who.textContent += " + " + eve.name + " dinner";
+        if(eve && eve.p.id !== bookedId) who.textContent += " + " + eve.p.name + (eve.kind === "extra" ? " second look" : eve.kind === "daybefore" ? " day before" : " dinner");
         else if(BY_ID[bookedId].post) who.textContent += " · evening";
       }
-      else if(eve) who.textContent = eve.name + " dinner";
+      else if(eve) who.textContent = eve.p.name + (eve.kind === "extra" ? " · second look" : eve.kind === "daybefore" ? " · day before" : " dinner");
       else if(holdP) who.textContent = "hold · " + holdP.name;
       else if(HOLIDAYS[iso]) who.textContent = HOLIDAYS[iso];
       else if(openHere.length) who.textContent = openHere.slice(0,3).map(p => p.name).join(", ") + (openHere.length > 3 ? " +" + (openHere.length-3) : "");
