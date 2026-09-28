@@ -43,18 +43,7 @@
 }
 *{box-sizing:border-box}
 button, .opt, .chip, .squeeze-row{touch-action:manipulation; -webkit-tap-highlight-color:transparent}
-@media (max-width:640px){
-  .opt{padding:11px 10px; gap:8px}
-  .opt .d{min-width:74px}
-  .rank{min-width:46px}
-  button.mini{padding:7px 12px; font-size:13px}
-  .chip{padding:8px 12px; font-size:13px}
-  .swaprow button{padding:8px 12px; font-size:12.5px}
-  button.anyway{padding:6px 12px; font-size:12.5px}
-  .searchrow{position:sticky; top:env(safe-area-inset-top, 0px); z-index:5}
-  .squeeze-row{padding:12px 15px}
-  .cell{min-height:48px}
-}
+
 body{
   margin:0; background:var(--bg); color:var(--ink);
   font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
@@ -78,7 +67,7 @@ header.top p{margin:6px 0 0; color:var(--muted); max-width:62ch; font-size:14px}
 .panel-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:13px 15px; border-bottom:1px solid var(--line)}
 .panel-head p{margin:3px 0 0; font-size:12.5px; color:var(--muted)}
 .list{display:flex; flex-direction:column}
-.prog{padding:12px 15px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:1fr auto; gap:4px 12px}
+.prog{padding:13px 15px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:1fr auto; gap:5px 12px}
 .prog:last-child{border-bottom:0}
 .prog.booked{background:var(--ok-soft)}
 .prog.out{opacity:.5}
@@ -87,8 +76,6 @@ header.top p{margin:6px 0 0; color:var(--muted); max-width:62ch; font-size:14px}
 .tag{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; padding:1px 6px; border-radius:3px}
 .tag.lock{background:var(--crit-soft); color:var(--crit)}
 .tag.flex{background:var(--surface-2); color:var(--faint)}
-.toggles{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
-.toggles .chip.on{background:var(--warn); border-color:var(--warn); color:var(--on-warn)}
 .squeeze-list{display:flex; flex-direction:column}
 .squeeze-row{display:flex; align-items:center; gap:9px; padding:9px 15px; border-bottom:1px solid var(--line); font-size:13.5px; cursor:pointer; background:none; border-left:0; border-right:0; border-top:0; width:100%; text-align:left; color:inherit; font-family:inherit}
 .squeeze-row:last-child{border-bottom:0}
@@ -109,11 +96,12 @@ header.top p{margin:6px 0 0; color:var(--muted); max-width:62ch; font-size:14px}
 .swaprow button:hover{filter:brightness(1.08)}
 .swaprow button:focus-visible{outline:2px solid var(--crit); outline-offset:2px}
 .flash{padding:9px 15px; background:var(--accent-soft); color:var(--accent); font-size:13px; border-bottom:1px solid var(--line)}
-.verdict{grid-column:1/-1; margin-top:8px; padding:6px 10px; border-left:3px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:500; border-radius:0 4px 4px 0}
-.addrow button.alt{background:var(--surface); color:var(--accent)}
-.commit{grid-column:1/-1; font-size:12px; color:var(--warn); margin-top:4px}
-.pnote{grid-column:1/-1; font-size:12.5px; color:var(--muted); margin-top:2px}
-.opts{grid-column:1/-1; display:flex; flex-direction:column; gap:5px; margin-top:8px}
+.verdict{grid-column:1/-1; margin-top:7px; padding:5px 10px; border-left:3px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:500; border-radius:0 4px 4px 0}
+.tag.eve{background:var(--warn-soft); color:var(--warn); cursor:help}
+.pnote{grid-column:1/-1; font-size:12.5px; color:var(--muted); line-height:1.45; max-width:74ch;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.prog:hover .pnote{-webkit-line-clamp:unset}
+.opts{grid-column:1/-1; display:flex; flex-direction:column; gap:4px; margin-top:7px}
 .opt{display:flex; gap:10px; align-items:flex-start; text-align:left; width:100%; background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:4px; padding:7px 10px; font:inherit; color:inherit; cursor:pointer}
 .opt:hover{border-color:var(--accent); background:var(--accent-soft)}
 .opt:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
@@ -191,21 +179,29 @@ button.mini:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .metrics{width:100%; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--faint); letter-spacing:.04em}
 .saving{font-size:11.5px; color:var(--faint); font-family:"IBM Plex Mono",monospace}
 footer{margin-top:24px; font-size:12px; color:var(--faint); border-top:1px solid var(--line); padding-top:12px}
-.editor{grid-column:1/-1; margin-top:8px; border:1px dashed var(--line); border-radius:4px; padding:10px; background:var(--surface-2)}
-.editor .hd{font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--faint); margin-bottom:7px}
-.dline{display:flex; align-items:center; gap:8px; padding:3px 0; font-size:13px}
-.dline .d{font-family:"IBM Plex Mono",monospace; font-weight:500; min-width:92px}
-.dline .src{font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--faint)}
-.dline .src.own{color:var(--ok)}
-.dline button{margin-left:auto}
-.addrow{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap}
-.addrow input{flex:1; min-width:120px; font:inherit; font-family:"IBM Plex Mono",monospace; font-size:13px; padding:5px 8px; border:1px solid var(--line); border-radius:4px; background:var(--surface); color:var(--ink)}
+.editor{grid-column:1/-1; margin-top:9px; border:1px solid var(--line); border-radius:5px; padding:10px 11px; background:var(--surface-2); display:flex; flex-direction:column; gap:8px}
+.ed-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.ed-title{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--faint)}
+button.ghost{font:inherit; font-size:11.5px; padding:0; border:0; background:none; color:var(--accent); cursor:pointer; text-decoration:underline; text-underline-offset:2px}
+.datechips{display:flex; flex-wrap:wrap; gap:6px}
+.datechip{display:inline-flex; align-items:center; gap:6px; font-family:"IBM Plex Mono",monospace; font-size:12.5px; padding:3px 4px 3px 9px; border:1px solid var(--line); border-radius:99px; background:var(--surface); white-space:nowrap}
+.datechip button{font:inherit; font-size:14px; line-height:1; width:18px; height:18px; border-radius:50%; border:0; background:none; color:var(--faint); cursor:pointer; pointer-events:auto}
+.datechip button:hover{background:var(--crit-soft); color:var(--crit)}
+.datechip button:focus-visible{outline:2px solid var(--crit); outline-offset:1px}
+.addrow{display:flex; gap:6px; flex-wrap:wrap}
+.addrow input{flex:1; min-width:140px; font:inherit; font-family:"IBM Plex Mono",monospace; font-size:12.5px; padding:5px 9px; border:1px solid var(--line); border-radius:4px; background:var(--surface); color:var(--ink)}
 .addrow input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
-.addrow button{font:inherit; font-size:12.5px; font-weight:500; padding:5px 12px; border-radius:4px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer}
+.addrow button{font:inherit; font-size:12px; font-weight:500; padding:5px 11px; border-radius:4px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer}
 .addrow button:hover{filter:brightness(1.08)}
 .addrow button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.addrow button.alt{background:transparent; color:var(--accent); border-color:var(--accent)}
+.addrow button.alt{background:transparent; color:var(--accent)}
 .addrow button.alt:hover{background:var(--accent-soft); filter:none}
+.ed-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.ed-label{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--faint)}
+.chip.sm{font-size:12px; padding:3px 9px}
+.chip.sm.on{background:var(--warn); border-color:var(--warn); color:var(--on-warn)}
+.hint{font-size:11.5px; color:var(--faint)}
+.err{font-size:11.5px; color:var(--crit)}
 .chips{display:flex; flex-wrap:wrap; gap:6px; padding:12px 15px 14px}
 .chip{font:inherit; font-size:12.5px; padding:4px 10px; border-radius:99px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px}
 .chip:hover{border-color:var(--accent); color:var(--accent)}
@@ -216,6 +212,27 @@ footer{margin-top:24px; font-size:12px; color:var(--faint); border-top:1px solid
 .tag.hint{font-size:11.5px; color:var(--faint); margin-top:6px}
 .err{font-size:12px; color:var(--crit); margin-top:6px}
 .nodates{grid-column:1/-1; font-size:12.5px; color:var(--warn); margin-top:6px}
+@media (max-width:640px){
+  /* Option rows read as two lines on a phone: verdict + date, then the reason. */
+  .opt{padding:10px; gap:6px 8px; flex-wrap:wrap; align-items:center}
+  .opt .rank{order:1; min-width:0}
+  .opt .d{order:2; flex:1 1 auto; min-width:0}
+  .opt .tag.plan{order:3}
+  .opt > button.anyway{order:3}
+  .opt .why{order:4; flex:1 1 100%; font-size:12px; line-height:1.4}
+  .pname{gap:5px 6px}
+  .pname .tag{font-size:9.5px}
+  .chance{font-size:11px}
+  .verdict{font-size:12.5px}
+  .datechip{font-size:12px}
+  button.mini{padding:7px 12px; font-size:13px}
+  .chip{padding:8px 12px; font-size:13px}
+  .swaprow button{padding:8px 12px; font-size:12.5px}
+  button.anyway{padding:6px 12px; font-size:12.5px}
+  .searchrow{position:sticky; top:env(safe-area-inset-top, 0px); z-index:5}
+  .squeeze-row{padding:12px 15px}
+  .cell{min-height:48px}
+}
 @media (prefers-reduced-motion:no-preference){.opt{transition:background .12s ease, border-color .12s ease}}
 </style>
 
@@ -606,6 +623,30 @@ function render(){
     if(tops[p.id]){
       const t = document.createElement("span"); t.className = "tag top"; t.textContent = "top pick"; head.append(t);
     }
+    /* Time commitments read as compact tags; the detail is in the tooltip and the editor. */
+    if(p.pre){
+      const t = document.createElement("span");
+      t.className = "tag eve"; t.textContent = p.preFull ? "+ day before" : "+ eve before";
+      t.title = (p.preFull ? "The whole day before: " : "The evening before: ") + p.pre;
+      head.append(t);
+    }
+    if(p.post){
+      const t = document.createElement("span");
+      t.className = "tag eve"; t.textContent = "+ that evening";
+      t.title = "The interview evening: " + p.post;
+      head.append(t);
+    }
+    for(const x of (p.extras || [])){
+      const t = document.createElement("span");
+      t.className = "tag eve"; t.textContent = "+ " + fmt(x);
+      t.title = "Also holds " + fmt(x);
+      head.append(t);
+    }
+    if(commits[p.id]){
+      const t = document.createElement("span");
+      t.className = "tag flex"; t.textContent = "edited"; t.title = "You changed this program's commitments";
+      head.append(t);
+    }
     if(dates[p.id]){
       const t = document.createElement("span"); t.className = "tag flex"; t.style.color = "var(--ok)"; t.textContent = "your dates"; head.append(t);
     }
@@ -704,20 +745,8 @@ function render(){
     } else {
       open++; exp += p.p/100;
       const n = document.createElement("div");
-      n.className = "pnote"; n.textContent = p.note;
+      n.className = "pnote"; n.textContent = p.note; n.title = p.note;
       el.append(n);
-
-      if(p.pre || p.post){
-        const c = document.createElement("div");
-        c.className = "commit";
-        const parts = [];
-        if(p.pre) parts.push((p.preFull ? "Whole day before: " : "Evening before: ") + p.pre);
-        if(p.post) parts.push("That evening: " + p.post);
-        for(const x of (p.extras || [])) parts.push("Also " + fmt(x));
-        if(commits[p.id]) parts.push("(yours)");
-        c.textContent = parts.join(" · ");
-        el.append(c);
-      }
 
       if(p.opts.length === 0){
         const w = document.createElement("div");
@@ -800,7 +829,7 @@ function render(){
         el.append(sw);
       }
       const free = ranked.filter(o => !o.clash.length);
-      if(p.opts.length >= 3 && free.length){
+      if(p.opts.length >= 3 && free.length && free.length < p.opts.length){
         const v = document.createElement("div");
         v.className = "verdict";
         const best = free[0];
@@ -1043,31 +1072,43 @@ function clashesOf(assign, openList, fixed){
 function dateEditor(p){
   const box = document.createElement("div");
   box.className = "editor";
-  const hd = document.createElement("div");
-  hd.className = "hd";
-  hd.textContent = dates[p.id] ? "Dates you entered" : "Dates from the 9/21/26 sheet — edit if they change";
-  box.append(hd);
+
+  const head = document.createElement("div");
+  head.className = "ed-head";
+  const title = document.createElement("span");
+  title.className = "ed-title";
+  title.textContent = dates[p.id] ? "Your dates" : "Dates from the 9/21/26 sheet";
+  head.append(title);
+  if(dates[p.id]){
+    const reset = document.createElement("button");
+    reset.className = "ghost";
+    reset.textContent = "Reset to sheet";
+    reset.dataset.act = "reset"; reset.dataset.id = p.id;
+    head.append(reset);
+  }
+  box.append(head);
 
   const current = p.opts;
+  const chips = document.createElement("div");
+  chips.className = "datechips";
   if(!current.length){
-    const empty = document.createElement("div");
-    empty.className = "hint"; empty.textContent = "Nothing on file yet.";
-    box.append(empty);
+    const empty = document.createElement("span");
+    empty.className = "hint"; empty.textContent = "None on file.";
+    chips.append(empty);
   }
   current.forEach((days, i) => {
-    const row = document.createElement("div");
-    row.className = "dline";
-    const d = document.createElement("span"); d.className = "d"; d.textContent = fmtOpt(days);
-    const src = document.createElement("span");
-    src.className = "src" + (dates[p.id] ? " own" : "");
-    src.textContent = dates[p.id] ? "yours" : "from sheet";
+    const chip = document.createElement("span");
+    chip.className = "datechip";
+    chip.append(fmtOpt(days));
     const rm = document.createElement("button");
-    rm.className = "mini"; rm.textContent = "Remove";
+    rm.textContent = "×";
+    rm.title = "Remove " + fmtOpt(days);
     rm.setAttribute("aria-label", "Remove " + fmtOpt(days) + " from " + p.name);
     rm.dataset.act = "rm"; rm.dataset.id = p.id; rm.dataset.i = i;
-    row.append(d, src, rm);
-    box.append(row);
+    chip.append(rm);
+    chips.append(chip);
   });
+  box.append(chips);
 
   const row = document.createElement("div");
   row.className = "addrow";
@@ -1078,9 +1119,11 @@ function dateEditor(p){
   input.setAttribute("aria-label", "Dates offered by " + p.name);
   const add = document.createElement("button");
   add.textContent = "Add";
+  add.title = "Add these to the dates above";
   const swap = document.createElement("button");
   swap.className = "alt";
-  swap.textContent = "Replace all";
+  swap.textContent = "Replace";
+  swap.title = "Replace every date above with these";
   const err = document.createElement("div");
   err.className = "err";
   err.hidden = !editMsg[p.id];
@@ -1088,7 +1131,7 @@ function dateEditor(p){
   const commit = (replace) => {
     const {ok, bad} = parseList(input.value);
     if(!ok.length){
-      err.textContent = "Use 11/13 for one day, 12/4-5 for a block, and commas between several: 11/13, 12/4-5, 1/9.";
+      err.textContent = "Try 11/13, or 12/4-5 for a block. Commas between several.";
       err.hidden = false;
       return;
     }
@@ -1098,7 +1141,7 @@ function dateEditor(p){
     for(const o of ok) if(!seen.has(o.join())){ seen.add(o.join()); merged.push(o); }
     merged.sort((a, b) => a[0] < b[0] ? -1 : 1);
     input.value = "";
-    if(bad.length) editMsg[p.id] = "Couldn't read: " + bad.join(", ") + " — the rest went in.";
+    if(bad.length) editMsg[p.id] = "Couldn't read: " + bad.join(", ");
     else delete editMsg[p.id];
     setDates(p.id, merged, null);
   };
@@ -1111,46 +1154,30 @@ function dateEditor(p){
 
   const hint = document.createElement("div");
   hint.className = "hint";
-  hint.textContent = "Paste every date a program offers, separated by commas — \"Replace all\" swaps out what's on file. November and December are read as 2026, January onward as 2027.";
+  hint.textContent = "Nov–Dec read as 2026, Jan onward as 2027.";
   box.append(hint);
 
-  const ch = document.createElement("div");
-  ch.className = "hd";
-  ch.style.marginTop = "14px";
-  ch.textContent = "Time commitments";
-  box.append(ch);
-
-  const toggles = document.createElement("div");
-  toggles.className = "toggles";
-  const toggle = (field, on, label) => {
+  const cr = document.createElement("div");
+  cr.className = "ed-row";
+  const lab = document.createElement("span");
+  lab.className = "ed-label"; lab.textContent = "Commitments";
+  cr.append(lab);
+  const toggle = (field, on, label, tip) => {
     const b = document.createElement("button");
-    b.className = "chip" + (on ? " on" : "");
+    b.className = "chip sm" + (on ? " on" : "");
     b.type = "button";
+    b.title = tip;
     b.setAttribute("aria-pressed", on ? "true" : "false");
     b.dataset.act = field === "pre" ? "togglepre" : "togglepost";
     b.dataset.id = p.id;
     b.textContent = (on ? "✓ " : "") + label;
     return b;
   };
-  toggles.append(toggle("pre", !!p.pre, "Dinner the evening before"));
-  toggles.append(toggle("post", !!p.post, "Commitment that evening"));
-  box.append(toggles);
-
-  const chint = document.createElement("div");
-  chint.className = "hint";
-  chint.textContent = p.pre
-    ? "The night before each date counts as booked, so nothing else can take that evening."
-    : "Turn on if the program holds a dinner or reception the night before.";
-  box.append(chint);
-
-  if(dates[p.id]){
-    const reset = document.createElement("button");
-    reset.className = "mini";
-    reset.style.marginTop = "8px";
-    reset.textContent = "Back to the sheet\u2019s dates";
-    reset.dataset.act = "reset"; reset.dataset.id = p.id;
-    box.append(reset);
-  }
+  cr.append(toggle("pre", !!p.pre, "Evening before",
+    p.pre ? "On: the night before each date is held for " + p.pre.toLowerCase() : "Turn on if they hold a dinner or reception the night before"));
+  cr.append(toggle("post", !!p.post, "Interview evening",
+    p.post ? "On: " + p.post.toLowerCase() : "Turn on if the interview evening is spoken for"));
+  box.append(cr);
   return box;
 }
 
