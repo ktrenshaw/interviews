@@ -4,234 +4,289 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Interview Booking Rules</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 :root{
   color-scheme: light;
-  --bg:#EDF1F3; --surface:#FFFFFF; --surface-2:#F5F8F9;
-  --ink:#131C22; --muted:#5B6B76; --faint:#8494A0; --line:#D3DCE1;
-  --accent:#15586B; --accent-soft:#DCEAEF;
-  --ok:#2C6B51; --ok-soft:#DCEDE3;
-  --warn:#A9531B; --warn-soft:#F6E5D6;
-  --crit:#8E2B2B; --crit-soft:#F4DFDF;
-  --on-accent:#FFFFFF; --on-warn:#FFFFFF; --on-crit:#FFFFFF;
-  --shadow:0 1px 2px rgba(19,28,34,.06), 0 6px 18px -12px rgba(19,28,34,.35);
+  --bg:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9; --surface-3:#E2E8F0;
+  --ink:#0F172A; --muted:#475569; --faint:#64748B; --line:#E2E8F0; --line-strong:#CBD5E1;
+  --accent:#0369A1; --accent-soft:#E0F2FE; --accent-line:#7DD3FC;
+  --ok:#15803D; --ok-soft:#DCFCE7; --ok-line:#86EFAC;
+  --warn:#B45309; --warn-soft:#FEF3C7; --warn-line:#FCD34D;
+  --crit:#B91C1C; --crit-soft:#FEE2E2; --crit-line:#FCA5A5;
+  --on-accent:#FFFFFF; --on-warn:#FFFFFF; --on-crit:#FFFFFF; --on-ok:#FFFFFF;
+  --r-lg:12px; --r:8px; --r-sm:6px;
+  --shadow:0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+  --shadow-lg:0 1px 2px rgba(15,23,42,.04), 0 12px 28px -16px rgba(15,23,42,.25);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme: dark;
-    --bg:#0D1418; --surface:#151F25; --surface-2:#1B262D;
-    --ink:#E4EBEF; --muted:#9BABB6; --faint:#71838E; --line:#26333B;
-    --accent:#6BB6CB; --accent-soft:#17323C;
-    --ok:#77C39C; --ok-soft:#183026;
-    --warn:#E0A272; --warn-soft:#33241A;
-    --crit:#E38686; --crit-soft:#341D1D;
-    --on-accent:#0D1418; --on-warn:#0D1418; --on-crit:#0D1418;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -14px rgba(0,0,0,.8);
+    --bg:#020617; --surface:#0F172A; --surface-2:#1E293B; --surface-3:#334155;
+    --ink:#F1F5F9; --muted:#CBD5E1; --faint:#94A3B8; --line:#1E293B; --line-strong:#334155;
+    --accent:#38BDF8; --accent-soft:#0C3049; --accent-line:#0369A1;
+    --ok:#4ADE80; --ok-soft:#0C2D1B; --ok-line:#166534;
+    --warn:#FBBF24; --warn-soft:#3A2A09; --warn-line:#92400E;
+    --crit:#F87171; --crit-soft:#3B1515; --crit-line:#991B1B;
+    --on-accent:#020617; --on-warn:#020617; --on-crit:#020617; --on-ok:#020617;
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+    --shadow-lg:0 1px 2px rgba(0,0,0,.4), 0 12px 28px -16px rgba(0,0,0,.9);
   }
 }
 :root[data-theme="dark"]{
   color-scheme: dark;
-  --bg:#0D1418; --surface:#151F25; --surface-2:#1B262D;
-  --ink:#E4EBEF; --muted:#9BABB6; --faint:#71838E; --line:#26333B;
-  --accent:#6BB6CB; --accent-soft:#17323C;
-  --ok:#77C39C; --ok-soft:#183026;
-  --warn:#E0A272; --warn-soft:#33241A;
-  --crit:#E38686; --crit-soft:#341D1D;
-  --on-accent:#0D1418; --on-warn:#0D1418; --on-crit:#0D1418;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -14px rgba(0,0,0,.8);
+  --bg:#020617; --surface:#0F172A; --surface-2:#1E293B; --surface-3:#334155;
+  --ink:#F1F5F9; --muted:#CBD5E1; --faint:#94A3B8; --line:#1E293B; --line-strong:#334155;
+  --accent:#38BDF8; --accent-soft:#0C3049; --accent-line:#0369A1;
+  --ok:#4ADE80; --ok-soft:#0C2D1B; --ok-line:#166534;
+  --warn:#FBBF24; --warn-soft:#3A2A09; --warn-line:#92400E;
+  --crit:#F87171; --crit-soft:#3B1515; --crit-line:#991B1B;
+  --on-accent:#020617; --on-warn:#020617; --on-crit:#020617; --on-ok:#020617;
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  --shadow-lg:0 1px 2px rgba(0,0,0,.4), 0 12px 28px -16px rgba(0,0,0,.9);
 }
 *{box-sizing:border-box}
 button, .opt, .chip, .squeeze-row{touch-action:manipulation; -webkit-tap-highlight-color:transparent}
 
 body{
   margin:0; background:var(--bg); color:var(--ink);
-  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  font-size:15px; line-height:1.5;
+  font-family:"Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:1180px; margin:0 auto; padding-inline:16px; padding-block:22px 56px}
-h1,h2,h3{font-family:"Source Serif 4", Georgia, serif; font-weight:600; margin:0; text-wrap:balance}
-h1{font-size:clamp(23px,4.4vw,31px); letter-spacing:-.01em}
-h2{font-size:18px}
-.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+.wrap{max-width:1240px; margin:0 auto; padding-inline:20px; padding-block:28px 64px}
+h1,h2,h3{font-weight:600; margin:0; text-wrap:balance; letter-spacing:-.015em}
+h1{font-size:clamp(24px,4vw,32px); letter-spacing:-.03em; font-weight:700}
+h2{font-size:17px}
+.eyebrow{font-size:12px; font-weight:500; letter-spacing:.02em; color:var(--faint)}
 .mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
-header.top{display:flex; flex-wrap:wrap; gap:14px 20px; align-items:flex-end; justify-content:space-between; border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:18px}
-header.top p{margin:6px 0 0; color:var(--muted); max-width:62ch; font-size:14px}
-.stats{display:flex; gap:18px; flex-wrap:wrap}
-.stat{min-width:74px}
-.stat .n{font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:600; font-variant-numeric:tabular-nums; display:block; line-height:1.1}
-.stat .l{font-size:11px; color:var(--faint); text-transform:uppercase; letter-spacing:.09em}
-.cols{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:22px; align-items:start}
-@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr)}}
-.panel{background:var(--surface); border:1px solid var(--line); border-radius:6px; box-shadow:var(--shadow)}
-.panel-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:13px 15px; border-bottom:1px solid var(--line)}
-.panel-head p{margin:3px 0 0; font-size:12.5px; color:var(--muted)}
+
+/* ---------- masthead ---------- */
+header.top{display:flex; flex-wrap:wrap; gap:18px 28px; align-items:flex-end; justify-content:space-between; padding-bottom:20px; margin-bottom:22px; border-bottom:1px solid var(--line)}
+header.top p{margin:8px 0 0; color:var(--muted); max-width:58ch; font-size:14px}
+.stats{display:flex; gap:10px; flex-wrap:wrap}
+.stat{min-width:92px; padding:10px 14px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow)}
+.stat .n{font-family:"IBM Plex Mono",monospace; font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; display:block; line-height:1.2; color:var(--ink)}
+.stat .l{font-size:12px; color:var(--muted); font-weight:500}
+.stat.alert .n{color:var(--crit)}
+
+.cols{display:grid; grid-template-columns:minmax(0,1.18fr) minmax(0,1fr); gap:24px; align-items:start}
+@media (max-width:960px){.cols{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); overflow:hidden}
+.panel-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:16px 18px; border-bottom:1px solid var(--line)}
+.panel-head h2{display:flex; align-items:baseline; gap:8px}
+.panel-head p{margin:4px 0 0; font-size:13px; color:var(--muted); max-width:58ch}
+.count{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:500; color:var(--faint)}
+
+/* ---------- program rows ---------- */
 .list{display:flex; flex-direction:column}
-.prog{padding:13px 15px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:1fr auto; gap:5px 12px}
+.prog{padding:16px 18px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:1fr auto; gap:8px 14px}
 .prog:last-child{border-bottom:0}
 .prog.booked{background:var(--ok-soft)}
-.prog.out{opacity:.5}
-.pname{font-weight:600; font-size:15px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
-.chance{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); border:1px solid var(--line); border-radius:99px; padding:1px 7px; background:var(--surface-2)}
-.tag{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; padding:1px 6px; border-radius:3px}
+.prog.out{opacity:.55}
+.pname{font-weight:600; font-size:15.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; letter-spacing:-.01em}
+.chance{font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:500; color:var(--muted); border:1px solid var(--line-strong); border-radius:999px; padding:1px 8px; background:var(--surface-2)}
+
+/* Pills: readable size, sentence case, pill radius — not 10px uppercase mono. */
+.tag{font-size:11.5px; font-weight:600; letter-spacing:0; padding:2px 9px; border-radius:999px; white-space:nowrap}
 .tag.lock{background:var(--crit-soft); color:var(--crit)}
-.tag.flex{background:var(--surface-2); color:var(--faint)}
-.squeeze-list{display:flex; flex-direction:column}
-.squeeze-row{display:flex; align-items:center; gap:9px; padding:9px 15px; border-bottom:1px solid var(--line); font-size:13.5px; cursor:pointer; background:none; border-left:0; border-right:0; border-top:0; width:100%; text-align:left; color:inherit; font-family:inherit}
-.squeeze-row:last-child{border-bottom:0}
-.squeeze-row:hover{background:var(--surface-2)}
-.squeeze-row .nm{font-weight:500; flex:1}
-.squeeze-row .pc{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--faint)}
-.swap{grid-column:1/-1; margin-top:8px; border:1px solid var(--crit); border-radius:4px; background:var(--crit-soft); padding:10px}
-.swap .hd{font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--crit); margin-bottom:8px}
-.swaprow{display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:6px 0; border-top:1px dotted var(--crit)}
-.swaprow:first-of-type{border-top:0}
-.swaprow .d{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:13px; min-width:92px}
-.swaprow .cost{flex:1 1 220px; min-width:170px; font-size:12.5px; color:var(--muted)}
-.swaprow button.move{background:var(--ok); border-color:var(--ok); color:var(--on-accent)}
-.swaprow button.move:hover{filter:brightness(1.08)}
-.swaprow button.alt{background:transparent; color:var(--crit)}
-.swaprow button.alt:hover{background:transparent; filter:none; text-decoration:underline}
-.swaprow button{font:inherit; font-size:12px; font-weight:500; padding:4px 10px; border-radius:4px; border:1px solid var(--crit); background:var(--crit); color:var(--on-crit); cursor:pointer}
-.swaprow button:hover{filter:brightness(1.08)}
-.swaprow button:focus-visible{outline:2px solid var(--crit); outline-offset:2px}
-.flash{padding:9px 15px; background:var(--accent-soft); color:var(--accent); font-size:13px; border-bottom:1px solid var(--line)}
-.verdict{grid-column:1/-1; margin-top:7px; padding:5px 10px; border-left:3px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:500; border-radius:0 4px 4px 0}
+.tag.flex{background:var(--surface-2); color:var(--muted)}
 .tag.eve{background:var(--warn-soft); color:var(--warn); cursor:help}
-.pnote{grid-column:1/-1; font-size:12.5px; color:var(--muted); line-height:1.45; max-width:74ch;
+.tag.top{background:var(--accent); color:var(--on-accent)}
+.tag.plan{background:var(--accent-soft); color:var(--accent); font-size:11px}
+.tag.mid{background:var(--ok-soft); color:var(--ok)}
+
+.acts{display:flex; gap:7px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+button.mini{font:inherit; font-size:13px; font-weight:500; padding:6px 12px; border-radius:var(--r); border:1px solid var(--line-strong); background:var(--surface); color:var(--muted); cursor:pointer; transition:background .12s ease, color .12s ease, border-color .12s ease}
+button.mini:hover{background:var(--surface-2); border-color:var(--faint); color:var(--ink)}
+button.mini:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+button.mini.primary{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+button.mini.primary:hover{filter:brightness(1.08); color:var(--on-accent)}
+
+.pnote{grid-column:1/-1; font-size:13px; color:var(--muted); line-height:1.5; max-width:76ch;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
 .prog:hover .pnote{-webkit-line-clamp:unset}
-.opts{grid-column:1/-1; display:flex; flex-direction:column; gap:4px; margin-top:7px}
-.opt{display:flex; gap:10px; align-items:flex-start; text-align:left; width:100%; background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:4px; padding:7px 10px; font:inherit; color:inherit; cursor:pointer}
-.opt:hover{border-color:var(--accent); background:var(--accent-soft)}
+
+/* ---------- date options ---------- */
+.opts{grid-column:1/-1; display:flex; flex-direction:column; gap:6px; margin-top:8px}
+.opt{display:flex; gap:12px; align-items:flex-start; text-align:left; width:100%; background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--line-strong); border-radius:var(--r); padding:10px 12px; font:inherit; color:inherit; cursor:pointer}
+.opt:hover{border-color:var(--accent-line); border-left-color:var(--accent); background:var(--accent-soft)}
 .opt:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.opt[disabled]{cursor:not-allowed; opacity:.62}
+.opt[disabled]{cursor:not-allowed; opacity:.6}
 .opt.static{cursor:default}
-.opt.static:hover{border-color:var(--crit); background:var(--crit-soft)}
-button.anyway{font:inherit; font-size:11.5px; padding:2px 9px; border-radius:99px; border:1px solid var(--crit); background:transparent; color:var(--crit); cursor:pointer; white-space:nowrap}
-button.anyway:hover{background:var(--crit); color:var(--on-crit)}
+.opt.static:hover{border-color:var(--crit-line); border-left-color:var(--crit); background:var(--crit-soft)}
+.opt.best{border-color:var(--ok-line); border-left-color:var(--ok); background:var(--ok-soft)}
+.opt.risky{border-color:var(--warn-line); border-left-color:var(--warn); background:var(--warn-soft)}
+.opt.blocked{border-color:var(--crit-line); border-left-color:var(--crit); background:var(--crit-soft)}
+.opt .d{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:13.5px; white-space:nowrap; min-width:92px; color:var(--ink)}
+.opt .why{font-size:13px; color:var(--muted); flex:1; line-height:1.45}
+/* The rank label carries the recommendation, so it reads at full strength. */
+.rank{font-size:11.5px; font-weight:600; letter-spacing:.01em; color:var(--muted); min-width:62px; padding-top:1px}
+.opt.best .rank{color:var(--ok)}
+.opt.risky .rank{color:var(--warn)}
+.opt.blocked .rank{color:var(--crit)}
+button.anyway{font:inherit; font-size:12px; font-weight:500; padding:4px 11px; border-radius:999px; border:1px solid var(--crit-line); background:var(--surface); color:var(--crit); cursor:pointer; white-space:nowrap}
+button.anyway:hover{background:var(--crit); color:var(--on-crit); border-color:var(--crit)}
 button.anyway:focus-visible{outline:2px solid var(--crit); outline-offset:2px}
-.swap.inline{margin-top:0; border-top-left-radius:0; border-top-right-radius:0; border-top:0}
-.opt.best{border-left-color:var(--ok); background:var(--ok-soft)}
-.opt.risky{border-left-color:var(--warn); background:var(--warn-soft)}
-.opt.blocked{border-left-color:var(--crit); background:var(--crit-soft)}
-.opt .d{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:13px; white-space:nowrap; min-width:88px}
-.opt .why{font-size:12.5px; color:var(--muted); flex:1}
-.rank{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); min-width:52px}
-.acts{display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
-button.mini{font:inherit; font-size:12px; padding:3px 9px; border-radius:4px; border:1px solid var(--line); background:var(--surface); color:var(--muted); cursor:pointer}
-button.mini:hover{border-color:var(--accent); color:var(--accent)}
-button.mini:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.booked-line{grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:6px; font-size:13px}
+
+.verdict{grid-column:1/-1; margin-top:8px; padding:8px 12px; border-left:3px solid var(--accent); background:var(--accent-soft); color:var(--accent); font-size:13px; font-weight:500; border-radius:0 var(--r) var(--r) 0}
+
+/* ---------- conflict / swap block ---------- */
+.swap{grid-column:1/-1; margin-top:10px; border:1px solid var(--crit-line); border-radius:var(--r); background:var(--crit-soft); padding:12px 14px}
+.swap .hd{font-size:12.5px; font-weight:600; color:var(--crit); margin-bottom:8px}
+.swaprow{display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:9px 0; border-top:1px solid var(--crit-line)}
+.swaprow:first-of-type{border-top:0}
+.swaprow .d{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:13.5px; min-width:96px}
+.swaprow .cost{flex:1 1 220px; min-width:170px; font-size:13px; color:var(--muted); line-height:1.45}
+.swaprow button{font:inherit; font-size:12.5px; font-weight:500; padding:6px 12px; border-radius:var(--r); border:1px solid var(--crit); background:var(--crit); color:var(--on-crit); cursor:pointer}
+.swaprow button:hover{filter:brightness(1.08)}
+.swaprow button:focus-visible{outline:2px solid var(--crit); outline-offset:2px}
+.swaprow button.move{background:var(--ok); border-color:var(--ok); color:var(--on-ok)}
+.swaprow button.alt{background:var(--surface); color:var(--crit); border-color:var(--crit-line)}
+.swaprow button.alt:hover{background:var(--surface-2); filter:none}
+.swap.inline{margin-top:-2px; border-top-left-radius:0; border-top-right-radius:0}
+
+.flash{display:flex; gap:10px; align-items:flex-start; padding:12px 18px; background:var(--accent-soft); color:var(--accent); font-size:13.5px; border-bottom:1px solid var(--line); cursor:pointer}
+.flash .x{margin-left:auto; font-weight:600; opacity:.7}
+
+/* ---------- booked ---------- */
+.booked-line{grid-column:1/-1; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:6px 16px; margin-top:4px; font-size:13px}
 .booked-line .d{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ok)}
-.booked-line .d.big{font-size:15px; letter-spacing:-.01em}
+.booked-line .d.big{font-size:15.5px; letter-spacing:-.01em}
+.booked-line .meta{font-size:13px; color:var(--muted)}
 .prog.sched{background:var(--ok-soft)}
-.otherdates{grid-column:1/-1; margin-top:9px; border:1px solid var(--line); border-radius:4px; background:var(--surface); overflow:hidden}
-.odrow{display:flex; align-items:center; gap:10px; padding:7px 10px; border-bottom:1px solid var(--line); font-size:13px}
+.otherdates{grid-column:1/-1; margin-top:10px; border:1px solid var(--line-strong); border-radius:var(--r); background:var(--surface); overflow:hidden}
+.odrow{display:flex; align-items:center; gap:12px; padding:9px 12px; border-bottom:1px solid var(--line); font-size:13.5px}
 .odrow:last-child{border-bottom:0}
-.odrow .d{font-family:"IBM Plex Mono",monospace; font-weight:500; min-width:96px}
-.odrow .st{flex:1; font-size:12.5px; color:var(--muted)}
-.cal{padding:12px 15px 16px}
-.month{margin-bottom:16px}
-.month h3{font-size:14px; margin-bottom:6px; display:flex; align-items:baseline; gap:8px}
-.grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:3px}
-.dow{font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--faint); text-align:center; padding-bottom:2px}
-.cell{min-height:58px; border:1px solid var(--line); border-radius:3px; padding:3px 4px; font-size:10px; background:var(--surface-2); overflow:hidden}
+.odrow .d{font-family:"IBM Plex Mono",monospace; font-weight:500; min-width:100px}
+.odrow .st{flex:1; font-size:13px; color:var(--muted)}
+
+/* ---------- squeezed ---------- */
+.squeeze-list{display:flex; flex-direction:column}
+.squeeze-row{display:flex; align-items:center; gap:10px; padding:12px 18px; border:0; border-bottom:1px solid var(--line); font-size:14px; cursor:pointer; background:none; width:100%; text-align:left; color:inherit; font-family:inherit}
+.squeeze-row:last-child{border-bottom:0}
+.squeeze-row:hover{background:var(--surface-2)}
+.squeeze-row:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+.squeeze-row .nm{font-weight:500; flex:1}
+.squeeze-row .pc{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted)}
+
+/* ---------- calendar ---------- */
+.cal{padding:16px 18px 18px}
+.month{margin-bottom:20px}
+.month:last-of-type{margin-bottom:12px}
+.month h3{font-size:14.5px; margin-bottom:8px; font-weight:600}
+.grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px}
+.dow{font-size:11px; font-weight:500; color:var(--faint); text-align:center; padding-bottom:4px}
+.cell{min-height:62px; border:1px solid var(--line); border-radius:var(--r-sm); padding:5px 6px; font-size:10.5px; background:var(--surface-2); overflow:hidden}
 .cell.blank{border-color:transparent; background:transparent}
-.cell .dn{font-family:"IBM Plex Mono",monospace; color:var(--faint); font-size:10px}
+.cell .dn{font-family:"IBM Plex Mono",monospace; color:var(--muted); font-size:11px; font-weight:500}
 .cell.has{background:var(--surface)}
 .cell.bookedday{background:var(--ok-soft); border-color:var(--ok)}
 .cell.bookedday .dn{color:var(--ok)}
-.cell.evening{background:var(--warn-soft); border-color:var(--warn); border-style:dashed}
-.cell.evening.full{border-style:solid}
-.cell.evening .dn{color:var(--warn)}
-.cell.evening .who{color:var(--warn)}
-.cell.hold{background:var(--crit-soft); border-color:var(--crit)}
-.cell.hold .dn{color:var(--crit)}
+.cell.evening{background:var(--warn-soft); border-color:var(--warn-line); border-style:dashed}
+.cell.evening.full{border-style:solid; border-color:var(--warn)}
+.cell.evening .dn, .cell.evening .who{color:var(--warn)}
+.cell.hold{background:var(--crit-soft); border-color:var(--crit-line)}
+.cell.hold .dn, .cell.hold .who{color:var(--crit)}
 .cell.holiday{background:var(--accent-soft); border-color:var(--accent-soft)}
-.cell .who{display:block; line-height:1.3; color:var(--muted); overflow-wrap:break-word; hyphens:none}
+.cell .who{display:block; line-height:1.35; color:var(--muted); overflow-wrap:anywhere; hyphens:none; margin-top:1px}
 .cell.bookedday .who{color:var(--ok); font-weight:600}
-.legend{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:11.5px; color:var(--muted); padding-top:4px}
-.swatch{display:inline-block; width:10px; height:10px; border-radius:2px; border:1px solid var(--line); margin-right:5px; vertical-align:-1px}
-.rules{padding:13px 15px 16px; font-size:13.5px; color:var(--muted)}
-.rules ol{margin:8px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:7px}
-.rules strong{color:var(--ink)}
+.legend{display:flex; flex-wrap:wrap; gap:8px 16px; font-size:12.5px; color:var(--muted); padding-top:10px; border-top:1px solid var(--line)}
+.swatch{display:inline-block; width:11px; height:11px; border-radius:3px; border:1px solid var(--line-strong); margin-right:6px; vertical-align:-1px}
+
+.rules{padding:16px 18px 20px; font-size:14px; color:var(--muted)}
+.rules ol{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:10px}
+.rules strong{color:var(--ink); font-weight:600}
+
 /* The one control that worked had no child elements; the ones that failed had
    spans inside. Make children transparent to pointers so the event target is
    always the button itself. */
 .opt > *, .chip > *, button.mini > *, .addrow button > *{pointer-events:none}
 /* …except a control of its own inside a row: it is its own hit target. */
 .opt > button.anyway{pointer-events:auto}
-.searchrow{display:flex; align-items:center; gap:10px; padding:10px 15px; border-bottom:1px solid var(--line); background:var(--surface-2)}
-.searchrow input{flex:1; min-width:0; font:inherit; font-size:14px; padding:7px 10px; border:1px solid var(--line); border-radius:5px; background:var(--surface); color:var(--ink)}
-.searchrow input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
-.searchrow span{font-size:11.5px; color:var(--faint); white-space:nowrap}
-.empty-search{padding:16px 15px; font-size:13.5px; color:var(--muted)}
+
+/* ---------- search ---------- */
+.searchrow{display:flex; align-items:center; gap:12px; padding:12px 18px; border-bottom:1px solid var(--line); background:var(--surface)}
+.searchrow input{flex:1; min-width:0; font:inherit; font-size:14.5px; padding:9px 12px; border:1px solid var(--line-strong); border-radius:var(--r); background:var(--surface); color:var(--ink)}
+.searchrow input::placeholder{color:var(--faint)}
+.searchrow input:focus-visible{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent)}
+.searchrow span{font-size:12.5px; color:var(--muted); white-space:nowrap}
+.empty-search{padding:20px 18px; font-size:14px; color:var(--muted)}
 
 [hidden]{display:none !important}
-.gate{max-width:440px; margin:40px auto; padding:26px 24px; text-align:left}
-.gate h2{margin-bottom:8px}
-.gate p{margin:0 0 18px; font-size:13.5px; color:var(--muted)}
-.gate-btn{font:inherit; font-size:14px; padding:9px 16px; border-radius:5px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer}
+.gate{max-width:460px; margin:48px auto; padding:28px 26px; text-align:left}
+.gate h2{margin-bottom:10px; font-size:19px}
+.gate p{margin:0 0 20px; font-size:14px; color:var(--muted)}
+.gate-btn{font:inherit; font-size:14.5px; font-weight:500; padding:10px 18px; border-radius:var(--r); border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer}
 .gate-btn:hover{filter:brightness(1.08)}
 .gate-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.gate-msg{margin-top:14px; font-size:13px; color:var(--crit)}
-.metrics{width:100%; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--faint); letter-spacing:.04em}
-.saving{font-size:11.5px; color:var(--faint); font-family:"IBM Plex Mono",monospace}
-footer{margin-top:24px; font-size:12px; color:var(--faint); border-top:1px solid var(--line); padding-top:12px}
-.editor{grid-column:1/-1; margin-top:9px; border:1px solid var(--line); border-radius:5px; padding:10px 11px; background:var(--surface-2); display:flex; flex-direction:column; gap:8px}
-.ed-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
-.ed-title{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--faint)}
-button.ghost{font:inherit; font-size:11.5px; padding:0; border:0; background:none; color:var(--accent); cursor:pointer; text-decoration:underline; text-underline-offset:2px}
-.datechips{display:flex; flex-wrap:wrap; gap:6px}
-.datechip{display:inline-flex; align-items:center; gap:6px; font-family:"IBM Plex Mono",monospace; font-size:12.5px; padding:3px 4px 3px 9px; border:1px solid var(--line); border-radius:99px; background:var(--surface); white-space:nowrap}
-.datechip button{font:inherit; font-size:14px; line-height:1; width:18px; height:18px; border-radius:50%; border:0; background:none; color:var(--faint); cursor:pointer; pointer-events:auto}
+.gate-msg{margin-top:16px; font-size:13.5px; color:var(--crit)}
+.metrics{width:100%; font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted)}
+.saving{font-size:12.5px; color:var(--muted); font-family:"IBM Plex Mono",monospace; white-space:nowrap}
+footer{margin-top:32px; font-size:13px; color:var(--muted); border-top:1px solid var(--line); padding-top:16px; max-width:80ch}
+
+/* ---------- date editor ---------- */
+.editor{grid-column:1/-1; margin-top:10px; border:1px solid var(--line-strong); border-radius:var(--r); padding:14px; background:var(--surface-2); display:flex; flex-direction:column; gap:12px}
+.ed-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px}
+.ed-title{font-size:12px; font-weight:600; color:var(--muted)}
+button.ghost{font:inherit; font-size:12.5px; font-weight:500; padding:0; border:0; background:none; color:var(--accent); cursor:pointer; text-decoration:underline; text-underline-offset:2px}
+button.ghost:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px}
+.datechips{display:flex; flex-wrap:wrap; gap:7px}
+.datechip{display:inline-flex; align-items:center; gap:7px; font-family:"IBM Plex Mono",monospace; font-size:13px; padding:4px 5px 4px 11px; border:1px solid var(--line-strong); border-radius:999px; background:var(--surface); white-space:nowrap}
+.datechip button{font:inherit; font-size:15px; line-height:1; width:20px; height:20px; border-radius:50%; border:0; background:none; color:var(--faint); cursor:pointer; pointer-events:auto}
 .datechip button:hover{background:var(--crit-soft); color:var(--crit)}
 .datechip button:focus-visible{outline:2px solid var(--crit); outline-offset:1px}
-.addrow{display:flex; gap:6px; flex-wrap:wrap}
-.addrow input{flex:1; min-width:140px; font:inherit; font-family:"IBM Plex Mono",monospace; font-size:12.5px; padding:5px 9px; border:1px solid var(--line); border-radius:4px; background:var(--surface); color:var(--ink)}
-.addrow input:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
-.addrow button{font:inherit; font-size:12px; font-weight:500; padding:5px 11px; border-radius:4px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer}
+.addrow{display:flex; gap:8px; flex-wrap:wrap}
+.addrow input{flex:1; min-width:150px; font:inherit; font-family:"IBM Plex Mono",monospace; font-size:13px; padding:7px 11px; border:1px solid var(--line-strong); border-radius:var(--r); background:var(--surface); color:var(--ink)}
+.addrow input::placeholder{color:var(--faint)}
+.addrow input:focus-visible{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent)}
+.addrow button{font:inherit; font-size:13px; font-weight:500; padding:7px 14px; border-radius:var(--r); border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer}
 .addrow button:hover{filter:brightness(1.08)}
 .addrow button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.addrow button.alt{background:transparent; color:var(--accent)}
-.addrow button.alt:hover{background:var(--accent-soft); filter:none}
-.ed-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
-.ed-label{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; color:var(--faint)}
-.chip.sm{font-size:12px; padding:3px 9px}
+/* Replace wipes the list, so it reads as the quieter, more deliberate control. */
+.addrow button.alt{background:var(--surface); color:var(--muted); border-color:var(--line-strong)}
+.addrow button.alt:hover{background:var(--surface-2); color:var(--crit); border-color:var(--crit-line); filter:none}
+.ed-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.ed-label{font-size:12px; font-weight:600; color:var(--muted)}
+.chip.sm{font-size:13px; padding:5px 11px}
 .chip.sm.on{background:var(--warn); border-color:var(--warn); color:var(--on-warn)}
-.hint{font-size:11.5px; color:var(--faint)}
-.err{font-size:11.5px; color:var(--crit)}
-.chips{display:flex; flex-wrap:wrap; gap:6px; padding:12px 15px 14px}
-.chip{font:inherit; font-size:12.5px; padding:4px 10px; border-radius:99px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:6px}
-.chip:hover{border-color:var(--accent); color:var(--accent)}
+.hint{font-size:12.5px; color:var(--muted); line-height:1.45}
+.err{font-size:12.5px; color:var(--crit)}
+
+/* ---------- top-pick chips ---------- */
+.chips{display:flex; flex-wrap:wrap; gap:8px; padding:16px 18px}
+.chips.empty{color:var(--muted); font-size:13.5px; align-items:center}
+.chip{font:inherit; font-size:13.5px; font-weight:500; padding:6px 13px; border-radius:999px; border:1px solid var(--line-strong); background:var(--surface); color:var(--muted); cursor:pointer; display:inline-flex; align-items:center; gap:7px; transition:background .12s ease, border-color .12s ease, color .12s ease}
+.chip:hover{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
 .chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
-.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:500}
-.chip .pct{font-family:"IBM Plex Mono",monospace; font-size:11px; opacity:.75}
-.tag.top{background:var(--accent); color:var(--on-accent)}
-.tag.hint{font-size:11.5px; color:var(--faint); margin-top:6px}
-.err{font-size:12px; color:var(--crit); margin-top:6px}
-.nodates{grid-column:1/-1; font-size:12.5px; color:var(--warn); margin-top:6px}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:600}
+.chip[aria-pressed="true"]:hover{filter:brightness(1.08); color:var(--on-accent)}
+.chip .pct{font-family:"IBM Plex Mono",monospace; font-size:12px; opacity:.72; font-weight:400}
+.nodates{grid-column:1/-1; font-size:13px; color:var(--warn); margin-top:4px}
+
 @media (max-width:640px){
+  .wrap{padding-inline:16px; padding-block:20px 48px}
+  header.top{gap:14px}
+  .stats{gap:8px; width:100%}
+  .stat{flex:1 1 calc(50% - 4px); min-width:0; padding:9px 12px}
   /* Option rows read as two lines on a phone: verdict + date, then the reason. */
-  .opt{padding:10px; gap:6px 8px; flex-wrap:wrap; align-items:center}
+  .opt{padding:11px; gap:6px 10px; flex-wrap:wrap; align-items:center}
   .opt .rank{order:1; min-width:0}
   .opt .d{order:2; flex:1 1 auto; min-width:0}
-  .opt .tag.plan{order:3}
+  .opt .tag.plan, .opt .tag.mid{order:3}
   .opt > button.anyway{order:3}
-  .opt .why{order:4; flex:1 1 100%; font-size:12px; line-height:1.4}
-  .pname{gap:5px 6px}
-  .pname .tag{font-size:9.5px}
-  .chance{font-size:11px}
-  .verdict{font-size:12.5px}
-  .datechip{font-size:12px}
-  button.mini{padding:7px 12px; font-size:13px}
-  .chip{padding:8px 12px; font-size:13px}
-  .swaprow button{padding:8px 12px; font-size:12.5px}
-  button.anyway{padding:6px 12px; font-size:12.5px}
-  .searchrow{position:sticky; top:env(safe-area-inset-top, 0px); z-index:5}
-  .squeeze-row{padding:12px 15px}
-  .cell{min-height:48px}
+  .opt .why{order:4; flex:1 1 100%; font-size:12.5px; line-height:1.45}
+  .pname{gap:6px}
+  .prog{padding:14px 16px}
+  .panel-head, .searchrow, .chips, .cal, .rules{padding-left:16px; padding-right:16px}
+  .squeeze-row{padding:13px 16px}
+  button.mini{padding:8px 13px; font-size:13.5px}
+  .chip{padding:8px 14px}
+  .swaprow button{padding:9px 14px}
+  button.anyway{padding:7px 13px}
+  .searchrow{position:sticky; top:0; z-index:5; box-shadow:0 1px 0 var(--line)}
+  .cell{min-height:52px}
 }
 @media (prefers-reduced-motion:no-preference){.opt{transition:background .12s ease, border-color .12s ease}}
 </style>
@@ -243,13 +298,13 @@ button.ghost{font:inherit; font-size:11.5px; padding:0; border:0; background:non
     <div>
       <div class="eyebrow">Neurosurgery 2026–27 · confirmed dates, 9/21/26</div>
       <h1>Interview Booking Rules</h1>
-      <p>Tap the date you're offered when an invite lands. Every other program's recommendation re-ranks around what you've already booked, so the next decision is always on screen. Dates are the confirmed 2026–27 dates as of 9/21/26. Correct any that change, and add the ones still missing.</p>
+      <p>Tap the date you're offered when an invite lands. Everything else re-ranks around it.</p>
     </div>
     <div class="stats" id="app-stats">
       <div class="stat"><span class="n" id="s-booked">0</span><span class="l">Booked</span></div>
       <div class="stat"><span class="n" id="s-open">0</span><span class="l">Awaiting</span></div>
       <div class="stat"><span class="n" id="s-exp">0</span><span class="l">Expected left</span></div>
-      <div class="stat"><span class="n" id="s-risk">0</span><span class="l">At risk</span></div>
+      <div class="stat" id="risk-stat"><span class="n" id="s-risk">0</span><span class="l">Squeezed</span></div>
     </div>
     <div id="metrics" class="metrics" hidden>taps 0 · clicks 0 · actions 0</div>
   </header>
@@ -262,14 +317,7 @@ button.ghost{font:inherit; font-size:11.5px; padding:0; border:0; background:non
   </section>
 
   <div class="cols" id="app">
-    <div style="display:flex; flex-direction:column; gap:22px">
-      <section class="panel">
-        <div class="panel-head">
-          <div><h2>Top programs <span id="top-count" class="mono" style="color:var(--faint);font-size:14px"></span></h2><p>The ones you'd take over anything else. Their days get defended first, and anything else gets moved out of their way.</p></div>
-        </div>
-        <div class="chips" id="tops"></div>
-      </section>
-
+    <div style="display:flex; flex-direction:column; gap:24px">
       <section class="panel">
         <div class="panel-head">
           <div><h2>Programs</h2><p id="sub-programs">Top picks first, then by how likely an invite is. Green is the slot to take.</p></div>
@@ -284,16 +332,23 @@ button.ghost{font:inherit; font-size:11.5px; padding:0; border:0; background:non
 
       <section class="panel" id="sched-panel" hidden>
         <div class="panel-head">
-          <div><h2>Scheduled <span id="sched-count" class="mono" style="color:var(--faint);font-size:14px"></span></h2><p>In date order. Open one to see the program's other dates and switch without giving up the slot.</p></div>
+          <div><h2>Scheduled <span id="sched-count" class="count"></span></h2><p>In date order. Open one to see the program's other dates and switch without giving up the slot.</p></div>
         </div>
         <div class="list" id="scheduled"></div>
       </section>
-
     </div>
 
-    <div style="display:flex; flex-direction:column; gap:22px">
+    <div style="display:flex; flex-direction:column; gap:24px">
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2>Top programs <span id="top-count" class="count"></span></h2><p>The ones you'd take over anything else. Their days get defended first, and their dates are pulled toward the middle of the season.</p></div>
+          <button class="mini" id="tops-toggle" data-act="toggletops">Choose</button>
+        </div>
+        <div class="chips" id="tops"></div>
+      </section>
+
       <section class="panel" id="squeeze-panel" hidden>
-        <div class="panel-head"><div><h2>Squeezed <span id="squeeze-count" class="mono" style="color:var(--faint);font-size:14px"></span></h2><p>Programs down to their last free date — or with none left. Tap one to jump to it.</p></div></div>
+        <div class="panel-head"><div><h2>Squeezed <span id="squeeze-count" class="count"></span></h2><p>Programs down to their last free date — or with none left. Tap one to jump to it.</p></div></div>
         <div class="squeeze-list" id="squeezed"></div>
       </section>
 
@@ -307,10 +362,11 @@ button.ghost{font:inherit; font-size:11.5px; padding:0; border:0; background:non
         <div class="rules">
           <ol>
             <li><strong>Book the day the invite arrives.</strong> Slots go first-come, and a date you hesitate on is usually the one that disappears.</li>
-            <li><strong>Protect the scarce programs.</strong> Miami offers one date, and several others offer two. The Squeezed panel names whoever is down to their last free day.</li>
+            <li><strong>Protect the scarce programs.</strong> <span id="rule-scarce"></span> The Squeezed panel names whoever is down to their last free day.</li>
             <li><strong>Move the flexible program, not the scarce one.</strong> If two collide, keep the program with fewer remaining dates and ask the other for its alternate — that request is routine in the first week.</li>
-            <li><strong>Keep a buffer.</strong> Pitt, Carolinas, VCU, Georgetown, GW and Rutgers have no dates yet — leave room for them.</li>
+            <li><strong>Keep a buffer.</strong> <span id="rule-buffer"></span></li>
             <li><strong>Watch the evening before.</strong> Most programs hold a dinner the night before, so a same-city back-to-back is fine and a cross-country one is not.</li>
+            <li><strong>Aim top picks at the middle.</strong> <span id="rule-mid"></span> Early interviews catch you unpractised and late ones catch you worn out — but this never outranks taking the interview at all.</li>
             <li><strong>Decline early, not late.</strong> Below about 20% likelihood, take the interview only if the day is still free.</li>
           </ol>
         </div>
@@ -319,8 +375,8 @@ button.ghost{font:inherit; font-size:11.5px; padding:0; border:0; background:non
   </div>
 
   <footer>
-    <div id="sync" style="margin-bottom:6px"></div>
-    <div id="diag" style="color:var(--crit); margin-bottom:6px"></div>
+    <div id="sync" style="margin-bottom:8px"></div>
+    <div id="diag" style="color:var(--crit); margin-bottom:8px"></div>
     Dates come from the AANS 2026–2027 interview date sheet dated 9/21/26. Programs without dates there, and any that change later, are yours to enter — the ranking logic doesn't depend on where a date came from, only on which days collide.
   </footer>
 </div>
@@ -388,7 +444,77 @@ let editing = {};          // id -> true while its date editor is open
 let editMsg = {};          // id -> a note from the last edit, kept across the re-render
 let flash = "";            // one-line result of the last swap
 let expanded = {};         // "<id>:<opt>" -> true while a taken date is showing its options
+let topsOpen = null;       // null = auto (open only until the first pick is made)
 let db = null, saveTimer = null, lastSaved = "", pending = false;
+
+/* ---------- when in the season a top pick should land ----------
+   Early interviews catch you unpractised; late ones catch you worn out. For TOP
+   PICKS ONLY, dates in the middle of the season are preferred.
+
+   This is strictly a tiebreaker. Both ceilings sit below the cost of harming
+   another program, so timing can reorder two dates that are otherwise equally
+   good but can never trade away an interview:
+     - in rank() units, stranding a program costs 54 at the very least, so the
+       ceiling is 10;
+     - in planCost() units, the cheapest collision that matters is about 0.3, so
+       the ceiling is 0.25.
+   The season is measured from the 10th to the 90th percentile of every date on
+   the board, so one outlier (Miami in October, Emory in late January) doesn't
+   stretch the window. SWEET_LO..SWEET_HI is a flat band in the middle, not a
+   single ideal day — there is no point shuffling between two good December
+   dates. Outside it the penalty rises with the square of the distance. */
+const TIMING_MAX = 10;
+const PLAN_TIMING_MAX = 0.25;
+const SWEET_LO = 0.35, SWEET_HI = 0.65;
+let TIMING = {};           // id -> [0..1 per option]  how far off-centre each date is
+let SEASON = null;         // {lo, hi, days} for the copy that explains the band
+
+function seasonSpan(){
+  const days = [];
+  for(const p of PROGRAMS) for(const o of p.opts) days.push(o[0]);
+  if(days.length < 4) return null;
+  days.sort();
+  const at = f => days[Math.floor((days.length - 1) * f)];
+  const lo = at(0.10), hi = at(0.90);
+  const span = (parse(hi) - parse(lo)) / 864e5;
+  return span > 0 ? {lo, hi, days: span} : null;
+}
+/* 0 anywhere inside the sweet band, rising to 1 at either end of the season. */
+function timingOff(day, s){
+  if(!s) return 0;
+  const t = ((parse(day) - parse(s.lo)) / 864e5) / s.days;
+  if(t >= SWEET_LO && t <= SWEET_HI) return 0;
+  const d = t < SWEET_LO ? (SWEET_LO - t) / SWEET_LO : (t - SWEET_HI) / (1 - SWEET_HI);
+  const c = Math.min(1, Math.max(0, d));
+  return c * c;
+}
+function buildTiming(){
+  SEASON = seasonSpan();
+  TIMING = {};
+  for(const p of PROGRAMS){
+    TIMING[p.id] = p.opts.map(o => tops[p.id] ? timingOff(o[0], SEASON) : 0);
+  }
+}
+function seasonT(days){
+  return SEASON ? ((parse(days[0]) - parse(SEASON.lo)) / 864e5) / SEASON.days : null;
+}
+/* A top pick's date inside the band — the row shows a pill, so the prose stays quiet. */
+function inSweet(p, days){
+  if(!tops[p.id]) return false;
+  const t = seasonT(days);
+  return t !== null && t >= SWEET_LO && t <= SWEET_HI;
+}
+/* Prose only when a date is genuinely off-centre. A date a day outside the band
+   is not "late in the season", and saying so on every row teaches you to ignore
+   it — 0.25 is a quarter of the way from the band's edge to the season's end. */
+const SAY_SEASON_AT = 0.25;
+function seasonNote(p, days){
+  if(!tops[p.id] || !SEASON) return null;
+  const t = seasonT(days);
+  if(t === null || (t >= SWEET_LO && t <= SWEET_HI)) return null;
+  if(timingOff(days[0], SEASON) < SAY_SEASON_AT) return null;
+  return t < SWEET_LO ? "early in the season" : "late in the season";
+}
 
 function applyDates(){
   for(const p of PROGRAMS){
@@ -465,6 +591,7 @@ function parseEntry(raw){
 
 function parse(d){ const [y,m,day] = d.split("-").map(Number); return new Date(y, m-1, day); }
 function fmt(d){ return parse(d).toLocaleDateString("en-US",{weekday:"short", month:"numeric", day:"numeric"}); }
+function fmtMD(d){ return parse(d).toLocaleDateString("en-US",{month:"short", day:"numeric"}); }
 function fmtOpt(days){
   if(days.length === 1) return fmt(days[0]);
   const a = parse(days[0]), b = parse(days[days.length-1]);
@@ -553,6 +680,7 @@ function eveningClashes(prog, oi, taken){
 }
 function rank(prog){
   const taken = bookedMap();
+  const off = TIMING[prog.id] || [];
   return prog.opts.map((days, i) => {
     const clash = days.map(d => taken[d]).filter(x => x && x !== prog.id).map(id => BY_ID[id]);
     const hurt = clash.length ? [] : squeeze(prog, i, taken);
@@ -560,10 +688,12 @@ function rank(prog){
     let cost = clash.length ? 1e6 : 0;
     for(const h of hurt) cost += weight(h.prog) * (h.lost ? 6 : 1) * (h.before - h.now) / Math.max(h.before, 1);
     for(const n of near) cost += 30 + weight(n.prog) * 0.3;
+    /* Last, and smallest: nudge a top pick toward the middle of the season. */
+    if(!clash.length) cost += TIMING_MAX * (off[i] || 0);
     return {i, days, clash, hurt, near, cost};
   }).sort((a,b) => a.cost - b.cost || a.i - b.i);
 }
-function reason(o){
+function reason(o, prog){
   if(o.clash.length) return "Taken — " + o.clash.map(p => p.name).join(", ") + " is booked this day.";
   const bits = [];
   const lost = o.hurt.filter(h => h.lost);
@@ -572,11 +702,15 @@ function reason(o){
   const tight = o.hurt.filter(h => !h.lost).slice(0,2);
   if(tight.length) bits.push("narrows " + tight.map(h => h.prog.name + " to " + h.now).join(", "));
   for(const n of o.near) bits.push(n.prog.name + ": " + n.why);
-  return bits.length ? bits.join("; ").replace(/^./, c => c.toUpperCase()) + "." : "Clear — nothing else needs this day.";
+  const season = prog ? seasonNote(prog, o.days) : null;
+  if(!bits.length) bits.push("clear — nothing else needs this day");
+  if(season) bits.push(season);
+  return bits.join("; ").replace(/^./, c => c.toUpperCase()) + ".";
 }
 
 /* ---------- render ---------- */
 function render(){
+  buildTiming();
   const taken = bookedMap(), held = heldDays(taken);
   const plan = bestPlan();
   const planPick = {};
@@ -590,7 +724,11 @@ function render(){
     const f = document.createElement("div");
     f.className = "flash";
     f.dataset.act = "dismissflash";
-    f.textContent = flash + "  ✕";
+    const t = document.createElement("span");
+    t.textContent = flash;
+    const x = document.createElement("span");
+    x.className = "x"; x.textContent = "✕";
+    f.append(t, x);
     listEl.append(f);
   }
   const order = [...PROGRAMS].sort((a,b) => {
@@ -621,39 +759,39 @@ function render(){
     chance.className = "chance"; chance.textContent = p.p + "%";
     head.append(chance);
     if(tops[p.id]){
-      const t = document.createElement("span"); t.className = "tag top"; t.textContent = "top pick"; head.append(t);
+      const t = document.createElement("span"); t.className = "tag top"; t.textContent = "Top pick"; head.append(t);
     }
     /* Time commitments read as compact tags; the detail is in the tooltip and the editor. */
     if(p.pre){
       const t = document.createElement("span");
-      t.className = "tag eve"; t.textContent = p.preFull ? "+ day before" : "+ eve before";
+      t.className = "tag eve"; t.textContent = p.preFull ? "Day before" : "Eve before";
       t.title = (p.preFull ? "The whole day before: " : "The evening before: ") + p.pre;
       head.append(t);
     }
     if(p.post){
       const t = document.createElement("span");
-      t.className = "tag eve"; t.textContent = "+ that evening";
+      t.className = "tag eve"; t.textContent = "That evening";
       t.title = "The interview evening: " + p.post;
       head.append(t);
     }
     for(const x of (p.extras || [])){
       const t = document.createElement("span");
-      t.className = "tag eve"; t.textContent = "+ " + fmt(x);
+      t.className = "tag eve"; t.textContent = fmtMD(x);
       t.title = "Also holds " + fmt(x);
       head.append(t);
     }
     if(commits[p.id]){
       const t = document.createElement("span");
-      t.className = "tag flex"; t.textContent = "edited"; t.title = "You changed this program's commitments";
+      t.className = "tag flex"; t.textContent = "Edited"; t.title = "You changed this program's commitments";
       head.append(t);
     }
     if(dates[p.id]){
-      const t = document.createElement("span"); t.className = "tag flex"; t.style.color = "var(--ok)"; t.textContent = "your dates"; head.append(t);
+      const t = document.createElement("span"); t.className = "tag flex"; t.style.color = "var(--ok)"; t.textContent = "Your dates"; head.append(t);
     }
     if(p.opts.length === 0){
-      const t = document.createElement("span"); t.className = "tag lock"; t.textContent = "no dates yet"; head.append(t);
+      const t = document.createElement("span"); t.className = "tag lock"; t.textContent = "No dates yet"; head.append(t);
     } else if(p.opts.length === 1){
-      const t = document.createElement("span"); t.className = "tag lock"; t.textContent = "one date only"; head.append(t);
+      const t = document.createElement("span"); t.className = "tag lock"; t.textContent = "One date only"; head.append(t);
     } else if(isOpen(p)){
       const free = freeOpts(p, taken).length;
       const t = document.createElement("span");
@@ -693,10 +831,11 @@ function render(){
       d.className = "d big"; d.textContent = fmtOpt(p.opts[s.opt]);
       line.append(d);
       const note = document.createElement("span");
-      note.style.cssText = "font-size:12.5px;color:var(--muted)";
+      note.className = "meta";
       const bits = [];
       if(p.pre) bits.push((p.preFull ? "full day " : "arrive ") + fmt(shift(p.opts[s.opt][0], -1)) + " — " + p.pre.toLowerCase());
-      if(p.post) bits.push(p.post.toLowerCase() + " that evening");
+      /* Some commitment notes already name the evening; don't append it twice. */
+      if(p.post) bits.push(/\bevening\b|\bnight\b/i.test(p.post) ? p.post.toLowerCase() : p.post.toLowerCase() + " that evening");
       for(const x of (p.extras || [])) bits.push("second look " + fmt(x));
       note.textContent = bits.length ? bits.join("; ") : p.note;
       line.append(note);
@@ -822,8 +961,8 @@ function render(){
         hd.textContent = "Every date is taken — what it costs to accept anyway";
         sw.append(hd);
         const sub = document.createElement("div");
-        sub.style.cssText = "font-size:12px;color:var(--muted);margin:-4px 0 8px";
-        sub.textContent = "Green moves the other program to one of its remaining dates in the same press. \u201cTake & reopen\u201d puts it back in play so you can prune its dates first; \u201cTake & drop\u201d sets it aside for good.";
+        sub.style.cssText = "font-size:13px;color:var(--muted);margin:-4px 0 8px;line-height:1.45";
+        sub.textContent = "Green moves the other program to one of its remaining dates in the same press. “Take & reopen” puts it back in play so you can prune its dates first; “Take & drop” sets it aside for good.";
         sw.append(sub);
         for(const o of ranked) sw.append(conflictRow(o, true));
         el.append(sw);
@@ -851,11 +990,11 @@ function render(){
           const wrap = document.createElement("div");
           wrap.className = "opt blocked static";
           const rk = document.createElement("span");
-          rk.className = "rank"; rk.textContent = "taken";
+          rk.className = "rank"; rk.textContent = "Taken";
           const d = document.createElement("span");
           d.className = "d"; d.textContent = fmtOpt(o.days);
           const why = document.createElement("span");
-          why.className = "why"; why.textContent = reason(o);
+          why.className = "why"; why.textContent = reason(o, p);
           const anyway = document.createElement("button");
           anyway.className = "anyway";
           anyway.textContent = expanded[key] ? "Never mind" : "Book anyway";
@@ -879,15 +1018,21 @@ function render(){
         btn.className = "opt " + (idx === 0 ? "best" : risky ? "risky" : "");
         const rk = document.createElement("span");
         rk.className = "rank";
-        rk.textContent = idx === 0 ? "take this" : risky ? "last resort" : "fallback " + idx;
+        rk.textContent = idx === 0 ? "Take this" : risky ? "Last resort" : "Fallback " + idx;
         const d = document.createElement("span");
         d.className = "d"; d.textContent = fmtOpt(o.days);
         const why = document.createElement("span");
-        why.className = "why"; why.textContent = reason(o);
+        why.className = "why"; why.textContent = reason(o, p);
         btn.append(rk, d, why);
+        /* A top pick landing in the middle of the season says so on the row. */
+        if(inSweet(p, o.days)){
+          const t = document.createElement("span");
+          t.className = "tag mid"; t.textContent = "Mid-season";
+          btn.append(t);
+        }
         if(planPick[p.id] === o.i){
           const t = document.createElement("span");
-          t.className = "tag plan"; t.textContent = "whole-board pick";
+          t.className = "tag plan"; t.textContent = "Whole-board pick";
           btn.append(t);
         }
         btn.dataset.act = "book"; btn.dataset.id = p.id; btn.dataset.opt = o.i;
@@ -906,7 +1051,11 @@ function render(){
   const schedPanel = document.getElementById("sched-panel");
   if(schedPanel) schedPanel.hidden = schedRows.length === 0;
   const schedCount = document.getElementById("sched-count");
-  if(schedCount) schedCount.textContent = booked ? "(" + booked + ")" : "";
+  /* The heading counts what is actually on screen, so it can't disagree with the
+     rows below it while a search is narrowing them. */
+  if(schedCount) schedCount.textContent = !booked ? ""
+    : (q && schedRows.length !== booked) ? "(" + schedRows.length + " of " + booked + ")"
+    : "(" + booked + ")";
   const countEl = document.getElementById("search-count");
   if(countEl) countEl.textContent = q ? shown + " of " + PROGRAMS.length : "";
   if(q && shown === 0){
@@ -920,11 +1069,35 @@ function render(){
   document.getElementById("s-open").textContent = open;
   document.getElementById("s-exp").textContent = exp.toFixed(1);
   document.getElementById("s-risk").textContent = atRisk;
+  const riskStat = document.getElementById("risk-stat");
+  if(riskStat) riskStat.classList.toggle("alert", atRisk > 0);
 
   renderTops();
   renderSqueezed(taken);
   renderCalendar(taken, held);
+  renderRules();
   wireAll();
+}
+
+/* The standing rules name real programs, so they are written from the board
+   rather than hard-coded — otherwise they start lying the moment dates arrive. */
+function renderRules(){
+  const single = PROGRAMS.filter(p => p.opts.length === 1).map(p => p.name);
+  const none = PROGRAMS.filter(p => p.opts.length === 0).map(p => p.name);
+  const list = xs => xs.length > 1 ? xs.slice(0,-1).join(", ") + " and " + xs[xs.length-1] : xs[0];
+  const scarce = document.getElementById("rule-scarce");
+  if(scarce) scarce.textContent = single.length
+    ? (single.length === 1 ? single[0] + " offers one date only." : list(single) + " offer one date only.")
+    : "Some programs offer only a date or two.";
+  const buffer = document.getElementById("rule-buffer");
+  if(buffer) buffer.textContent = none.length
+    ? list(none) + " " + (none.length === 1 ? "has" : "have") + " no dates yet — leave room."
+    : "Every program on the board has dates now, so there is nothing left to hold room for.";
+  const mid = document.getElementById("rule-mid");
+  if(mid) mid.textContent = SEASON
+    ? "Top picks are steered toward " + fmtMD(shift(SEASON.lo, Math.round(SEASON.days * SWEET_LO)))
+      + "–" + fmtMD(shift(SEASON.lo, Math.round(SEASON.days * SWEET_HI))) + ", the middle of this season."
+    : "Top picks are steered toward the middle of the season once there are enough dates to tell where that is.";
 }
 
 function renderSqueezed(taken){
@@ -950,14 +1123,14 @@ function renderSqueezed(taken){
     nm.className = "nm"; nm.textContent = p.name;
     const tag = document.createElement("span");
     tag.className = "tag " + (free === 0 ? "lock" : "flex");
-    tag.textContent = free === 0 ? "no free dates" : "1 date left";
+    tag.textContent = free === 0 ? "No free dates" : "1 date left";
     if(free > 0) tag.style.color = "var(--warn)";
     const pc = document.createElement("span");
     pc.className = "pc"; pc.textContent = p.p + "%";
     row.append(nm);
     if(tops[p.id]){
       const t = document.createElement("span");
-      t.className = "tag top"; t.textContent = "top pick";
+      t.className = "tag top"; t.textContent = "Top pick";
       row.append(t);
     }
     row.append(tag, pc);
@@ -965,12 +1138,30 @@ function renderSqueezed(taken){
   }
 }
 
+/* The picker is 37 chips long, so it stays folded once a choice has been made:
+   the panel then shows the picks themselves, which is what you come back for. */
+function topsExpanded(chosen){ return topsOpen === null ? chosen === 0 : topsOpen; }
 function renderTops(){
   const el = document.getElementById("tops");
   el.textContent = "";
-  const chosen = PROGRAMS.filter(p => tops[p.id]).length;
+  const picked = PROGRAMS.filter(p => tops[p.id]);
+  const chosen = picked.length;
   document.getElementById("top-count").textContent = chosen ? "(" + chosen + ")" : "";
-  for(const p of [...PROGRAMS].sort((a, b) => (tops[b.id] ? 1 : 0) - (tops[a.id] ? 1 : 0) || b.p - a.p)){
+  const openNow = topsExpanded(chosen);
+  const btn = document.getElementById("tops-toggle");
+  if(btn){
+    btn.textContent = openNow ? "Done" : chosen ? "Edit" : "Choose";
+    btn.className = "mini" + (openNow ? " primary" : "");
+  }
+  el.className = "chips" + (!openNow && !chosen ? " empty" : "");
+  if(!openNow && !chosen){
+    el.append("None chosen yet — pick the programs you'd take over anything else.");
+    return;
+  }
+  const show = openNow
+    ? [...PROGRAMS].sort((a, b) => (tops[b.id] ? 1 : 0) - (tops[a.id] ? 1 : 0) || b.p - a.p)
+    : picked.sort((a, b) => b.p - a.p);
+  for(const p of show){
     const b = document.createElement("button");
     b.className = "chip";
     b.type = "button";
@@ -1008,6 +1199,12 @@ function planCost(assign, openList, fixed){
       for(let j = i+1; j < here.length; j++)
         cost += here[i].w * here[j].w * weight(BY_ID[here[i].id]) * weight(BY_ID[here[j].id]) / 10000;
   }
+  /* Same mid-season preference as rank(), scaled to this cost function so it
+     settles ties without ever being worth a collision. */
+  openList.forEach((p, k) => {
+    const off = TIMING[p.id];
+    if(off) cost += PLAN_TIMING_MAX * (off[assign[k]] || 0);
+  });
   return cost;
 }
 let planMemo = {key:null, value:null};
@@ -1122,7 +1319,7 @@ function dateEditor(p){
   add.title = "Add these to the dates above";
   const swap = document.createElement("button");
   swap.className = "alt";
-  swap.textContent = "Replace";
+  swap.textContent = "Replace all";
   swap.title = "Replace every date above with these";
   const err = document.createElement("div");
   err.className = "err";
@@ -1236,8 +1433,10 @@ function renderCalendar(taken, held){
       else if(HOLIDAYS[iso]) who.textContent = HOLIDAYS[iso];
       else if(openHere.length) who.textContent = openHere.slice(0,3).map(p => p.name).join(", ") + (openHere.length > 3 ? " +" + (openHere.length-3) : "");
       c.append(who);
-      c.title = (bookedId ? "Booked: " + BY_ID[bookedId].name + (BY_ID[bookedId].post ? " — " + BY_ID[bookedId].post + " that evening" : "")
-        : openHere.map(p => p.name + " " + p.p + "%").join(" · ")) || "";
+      /* Every name on the day, including the ones the cell had to trim. */
+      c.title = bookedId
+        ? "Booked: " + BY_ID[bookedId].name + (BY_ID[bookedId].post ? " — " + BY_ID[bookedId].post + " that evening" : "")
+        : (openHere.length ? "Offered by " + openHere.map(p => p.name + " " + p.p + "%").join(" · ") : "");
       g.append(c);
     }
     sec.append(g); wrap.append(sec);
@@ -1247,8 +1446,9 @@ function renderCalendar(taken, held){
   const items = [["var(--ok-soft)","Booked"],["var(--warn-soft)","Evening commitment"],["var(--crit-soft)","Hold — someone's last date"],["var(--surface)","Offered by an open program"],["var(--accent-soft)","Holiday"]];
   for(const [bg, label] of items){
     const s = document.createElement("span");
-    s.innerHTML = '<span class="swatch" style="background:' + bg + '"></span>';
-    s.append(label); leg.append(s);
+    const sw = document.createElement("span");
+    sw.className = "swatch"; sw.style.background = bg;
+    s.append(sw, label); leg.append(s);
   }
   wrap.append(leg);
 }
@@ -1272,7 +1472,19 @@ function doAct(el){
       case "out":    setStatus(id, {status:"out"}); break;
       case "reopen": setStatus(id, null); break;
       case "edit":   editing[id] = !editing[id]; if(!editing[id]) delete editMsg[id]; render(); break;
-      case "top":    if(tops[id]) delete tops[id]; else tops[id] = true; render(); save(); break;
+      case "top": {
+        /* Picking from the open list must not fold it shut under your finger. */
+        if(topsExpanded(PROGRAMS.filter(p => tops[p.id]).length)) topsOpen = true;
+        if(tops[id]) delete tops[id]; else tops[id] = true;
+        render(); save();
+        break;
+      }
+      case "toggletops": {
+        const chosen = PROGRAMS.filter(p => tops[p.id]).length;
+        topsOpen = !topsExpanded(chosen);
+        render();
+        break;
+      }
       case "rm":     setDates(id, BY_ID[id].opts.filter((_, j) => j !== +el.dataset.i), null); break;
       case "add":    if(ADDERS[id]) ADDERS[id](false); break;
       case "swap":   if(ADDERS[id]) ADDERS[id](true); break;
