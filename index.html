@@ -59,7 +59,6 @@ body{
 h1,h2,h3{font-weight:600; margin:0; text-wrap:balance; letter-spacing:-.015em}
 h1{font-size:clamp(24px,4vw,32px); letter-spacing:-.03em; font-weight:700}
 h2{font-size:17px}
-.eyebrow{font-size:12px; font-weight:500; letter-spacing:.02em; color:var(--faint)}
 .mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
 
 /* ---------- masthead ---------- */
@@ -192,12 +191,25 @@ button.anyway:focus-visible{outline:2px solid var(--crit); outline-offset:2px}
 .cell.holiday{background:var(--accent-soft); border-color:var(--accent-soft)}
 .cell .who{display:block; line-height:1.35; color:var(--muted); overflow-wrap:anywhere; hyphens:none; margin-top:1px}
 .cell.bookedday .who{color:var(--ok); font-weight:600}
+.cell.travel{background:var(--surface-3); border-color:var(--faint); border-style:dashed}
+.cell.travel .dn, .cell.travel .who{color:var(--muted)}
+.trip{padding:14px 18px; border-bottom:1px solid var(--line)}
+.trip:last-child{border-bottom:0}
+.trip-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; margin-bottom:8px}
+.trip-head .d{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:13.5px; color:var(--ink)}
+.trip-where{font-size:13px; color:var(--muted)}
+.trip-line{font-size:13px; line-height:1.5; padding-left:14px; position:relative; color:var(--muted)}
+.trip-line::before{content:""; position:absolute; left:3px; top:9px; width:5px; height:5px; border-radius:50%; background:var(--line-strong)}
+.trip-line.stop{color:var(--ink); font-weight:500}
+.trip-line.stop::before{background:var(--ok)}
+.trip-line.warn{color:var(--warn)}
+.trip-line.warn::before{background:var(--warn)}
+.trip-line.bad{color:var(--crit)}
+.trip-line.bad::before{background:var(--crit)}
+.travel-note{padding:12px 18px 16px; font-size:12.5px; line-height:1.5; color:var(--muted); border-top:1px solid var(--line)}
 .legend{display:flex; flex-wrap:wrap; gap:8px 16px; font-size:12.5px; color:var(--muted); padding-top:10px; border-top:1px solid var(--line)}
 .swatch{display:inline-block; width:11px; height:11px; border-radius:3px; border:1px solid var(--line-strong); margin-right:6px; vertical-align:-1px}
 
-.rules{padding:16px 18px 20px; font-size:14px; color:var(--muted)}
-.rules ol{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:10px}
-.rules strong{color:var(--ink); font-weight:600}
 
 /* The one control that worked had no child elements; the ones that failed had
    spans inside. Make children transparent to pointers so the event target is
@@ -279,7 +291,7 @@ button.ghost:focus-visible{outline:2px solid var(--accent); outline-offset:2px; 
   .opt .why{order:4; flex:1 1 100%; font-size:12.5px; line-height:1.45}
   .pname{gap:6px}
   .prog{padding:14px 16px}
-  .panel-head, .searchrow, .chips, .cal, .rules{padding-left:16px; padding-right:16px}
+  .panel-head, .searchrow, .chips, .cal{padding-left:16px; padding-right:16px}
   .squeeze-row{padding:13px 16px}
   button.mini{padding:8px 13px; font-size:13.5px}
   .chip{padding:8px 14px}
@@ -296,9 +308,7 @@ button.ghost:focus-visible{outline:2px solid var(--accent); outline-offset:2px; 
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow">Neurosurgery 2026–27 · confirmed dates, 9/21/26</div>
       <h1>Interview Booking Rules</h1>
-      <p>Tap the date you're offered when an invite lands. Everything else re-ranks around it.</p>
     </div>
     <div class="stats" id="app-stats">
       <div class="stat"><span class="n" id="s-booked">0</span><span class="l">Booked</span></div>
@@ -320,7 +330,7 @@ button.ghost:focus-visible{outline:2px solid var(--accent); outline-offset:2px; 
     <div style="display:flex; flex-direction:column; gap:24px">
       <section class="panel">
         <div class="panel-head">
-          <div><h2>Programs</h2><p id="sub-programs">Top picks first, then by how likely an invite is. Green is the slot to take.</p></div>
+          <div><h2>Programs</h2></div>
           <span class="saving" id="saving"></span>
         </div>
         <div class="searchrow">
@@ -332,7 +342,7 @@ button.ghost:focus-visible{outline:2px solid var(--accent); outline-offset:2px; 
 
       <section class="panel" id="sched-panel" hidden>
         <div class="panel-head">
-          <div><h2>Scheduled <span id="sched-count" class="count"></span></h2><p>In date order. Open one to see the program's other dates and switch without giving up the slot.</p></div>
+          <div><h2>Scheduled <span id="sched-count" class="count"></span></h2></div>
         </div>
         <div class="list" id="scheduled"></div>
       </section>
@@ -341,36 +351,27 @@ button.ghost:focus-visible{outline:2px solid var(--accent); outline-offset:2px; 
     <div style="display:flex; flex-direction:column; gap:24px">
       <section class="panel">
         <div class="panel-head">
-          <div><h2>Top programs <span id="top-count" class="count"></span></h2><p>The ones you'd take over anything else. Their days get defended first, and their dates are pulled toward the middle of the season.</p></div>
+          <div><h2>Top programs <span id="top-count" class="count"></span></h2></div>
           <button class="mini" id="tops-toggle" data-act="toggletops">Choose</button>
         </div>
         <div class="chips" id="tops"></div>
       </section>
 
       <section class="panel" id="squeeze-panel" hidden>
-        <div class="panel-head"><div><h2>Squeezed <span id="squeeze-count" class="count"></span></h2><p>Programs down to their last free date — or with none left. Tap one to jump to it.</p></div></div>
+        <div class="panel-head"><div><h2>Squeezed <span id="squeeze-count" class="count"></span></h2></div></div>
         <div class="squeeze-list" id="squeezed"></div>
       </section>
 
-      <section class="panel">
-        <div class="panel-head"><div><h2>Calendar</h2><p>Booked days, days held for single-date programs, and holidays.</p></div></div>
-        <div class="cal" id="calendar"></div>
+      <section class="panel" id="travel-panel" hidden>
+        <div class="panel-head"><div><h2>Travel <span id="travel-count" class="count"></span></h2></div></div>
+        <div id="travel"></div>
       </section>
 
       <section class="panel">
-        <div class="panel-head"><div><h2>Standing rules</h2></div></div>
-        <div class="rules">
-          <ol>
-            <li><strong>Book the day the invite arrives.</strong> Slots go first-come, and a date you hesitate on is usually the one that disappears.</li>
-            <li><strong>Protect the scarce programs.</strong> <span id="rule-scarce"></span> The Squeezed panel names whoever is down to their last free day.</li>
-            <li><strong>Move the flexible program, not the scarce one.</strong> If two collide, keep the program with fewer remaining dates and ask the other for its alternate — that request is routine in the first week.</li>
-            <li><strong>Keep a buffer.</strong> <span id="rule-buffer"></span></li>
-            <li><strong>Watch the evening before.</strong> Most programs hold a dinner the night before, so a same-city back-to-back is fine and a cross-country one is not.</li>
-            <li><strong>Aim top picks at the middle.</strong> <span id="rule-mid"></span> Early interviews catch you unpractised and late ones catch you worn out — but this never outranks taking the interview at all.</li>
-            <li><strong>Decline early, not late.</strong> Below about 20% likelihood, take the interview only if the day is still free.</li>
-          </ol>
-        </div>
+        <div class="panel-head"><div><h2>Calendar</h2></div></div>
+        <div class="cal" id="calendar"></div>
       </section>
+
     </div>
   </div>
 
@@ -386,43 +387,43 @@ button.ghost:focus-visible{outline:2px solid var(--accent); outline-offset:2px; 
 <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script>
 const PROGRAMS = [
-  {id:"tufts", pre:"Dinner with residents", name:"Tufts", p:95, note:"Home program. Dinner the evening before.", opts:[["2026-11-12"], ["2026-12-10"], ["2027-01-14"]]},
-  {id:"utah", pre:"Dinner with residents", name:"Utah", p:87, note:"October 28 and December 2 are confirmed. The November date is unreadable in the sheet — ask and add it.", opts:[["2026-10-28"], ["2026-12-02"]]},
-  {id:"dartmouth", pre:"Dinner with residents", name:"Dartmouth", p:72, note:"Dinner with residents the evening before.", opts:[["2026-11-06"], ["2026-11-20"], ["2026-12-18"]]},
-  {id:"vermont", pre:"Dinner with residents", name:"Vermont", p:67, note:"Dinner the evening before with residents.", opts:[["2026-11-05"], ["2026-12-10"], ["2027-01-07"]]},
-  {id:"wvu", pre:"Dinner + hotel provided", name:"West Virginia", p:65, note:"Four November dates. Dinner the night before and hotel provided.", opts:[["2026-11-09"], ["2026-11-13"], ["2026-11-16"], ["2026-11-20"]]},
-  {id:"mgb", post:"Dinner with residents", name:"MGB", p:62, note:"Dinner the night OF interviews, residents only — no evening-before commitment.", opts:[["2027-01-05"], ["2027-01-06"]]},
-  {id:"bidmc", pre:"Dinner with residents", name:"Beth Israel", p:62, note:"Dinner with residents the evening before.", opts:[["2026-11-13"], ["2026-12-09"], ["2026-12-17"]]},
-  {id:"jefferson", pre:"Dinner with residents", name:"Thomas Jefferson", p:60, note:"Dinner with residents Friday evening. Interviews 8 am–3 pm Saturday, with breakfast, lunch and a campus tour.", opts:[["2026-11-07"], ["2026-12-12"], ["2027-01-09"]]},
-  {id:"vcu", name:"VCU", p:60, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
-  {id:"wake", pre:"Dinner, 6:30 pm", post:"Optional city tour", name:"Wake Forest", p:60, note:"Dinner the evening before at 6:30 pm. Interview day 7:30 am–1:30 pm, optional city tour after.", opts:[["2026-10-27"], ["2026-11-10"], ["2026-12-08"]]},
-  {id:"georgetown", name:"Georgetown", p:60, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
-  {id:"gwu", name:"George Washington", p:60, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
-  {id:"maryland", pre:"Dinner with residents", name:"Maryland", p:57, note:"Dinner the evening before.", opts:[["2026-12-18"], ["2027-01-08"], ["2027-01-22"]]},
-  {id:"einstein", pre:"Dinner with residents", name:"Albert Einstein", p:57, note:"Listed as Montefiore. Dinner with residents the evening before.", opts:[["2026-11-06"], ["2026-12-04"], ["2026-12-11"], ["2027-01-08"]]},
-  {id:"inova", pre:"Dinner with residents", name:"Inova", p:55, note:"Dinner the evening before with residents.", opts:[["2026-11-10"], ["2026-12-01"]]},
-  {id:"uva", pre:"Meet and greet with residents", post:"Dinner at the PD's home", name:"UVA", p:52, note:"Meet and greet the evening before with residents; dinner at the PD's home the evening of interviews; neuroanatomy lab and city tour.", opts:[["2026-11-06"], ["2026-12-11"], ["2027-01-08"]]},
-  {id:"colorado", pre:"Presentation + dinner", post:"Cocktails and dinner", name:"Colorado", p:52, note:"Presentation and dinner with residents the Thursday evening before; Friday interviews 7:30–3:00, campus tour, then cocktails at the Chair's home and dinner in Cherry Creek.", opts:[["2026-11-13"], ["2026-12-11"], ["2027-01-08"]]},
-  {id:"unc", pre:"Dinner with residents", name:"UNC", p:52, note:"Dinner the evening before with residents.", opts:[["2026-12-09"], ["2026-12-16"], ["2027-01-13"]]},
-  {id:"carolinas", name:"Carolinas", p:52, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
-  {id:"pitt", name:"Pitt", p:47, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
-  {id:"emory", pre:"Tours + dinner", name:"Emory", p:47, note:"Two-day visit, Jan 23–24. Hospital site tours and dinner with residents the evenings of Jan 22 and 23.", opts:[["2027-01-23", "2027-01-24"]]},
-  {id:"tennessee", pre:"Welcome dinner", post:"Optional lab", name:"Tennessee", p:47, note:"Welcome dinner the night before (Sunday). Interviews 7:30 am–2:30 pm Monday, then a city and hospital tour. Optional lab Monday night.", opts:[["2026-11-09"], ["2026-12-07"]]},
-  {id:"michigan", pre:"Dinner with residents", name:"Michigan", p:42, note:"Five dates. Dinner the evening before. Note 11/23 is Thanksgiving week.", opts:[["2026-11-11"], ["2026-11-23"], ["2026-12-01"], ["2026-12-11"], ["2027-01-12"]]},
-  {id:"uw", pre:"City tour, museum, simulation lab, dinner", preFull:true, name:"U Washington", p:37, note:"The whole day before is theirs: city tour, museum, surgical simulation lab and dinner with residents. Two full days.", opts:[["2026-11-07"], ["2026-12-12"]]},
-  {id:"penn", post:"Dinner after interviews", name:"Penn", p:37, note:"Full one-day interview, 7 am–5 pm, with dinner to follow.", opts:[["2026-10-29"], ["2026-11-19"], ["2027-01-07"]]},
-  {id:"duke", post:"Dinner the evening after (last cycle — confirm)", name:"Duke", p:37, note:"The sheet lists no evening events this year; last cycle it was dinner the evening AFTER the interview day, carried over here — confirm with the program.", opts:[["2026-11-14"], ["2026-12-12"]]},
-  {id:"umass", pre:"Meet and greet + dinner", name:"UMass", p:19, note:"Meet and greet with faculty and residents the evening before, then dinner with residents.", opts:[["2026-11-17"], ["2026-12-02"], ["2026-12-10"]]},
-  {id:"brown", pre:"Dinner with residents", name:"Brown", p:16, note:"Dinner the evening before with residents.", opts:[["2026-12-01"], ["2026-12-07"]]},
-  {id:"uconn", pre:"Dinner with residents", name:"UConn", p:15, note:"In person this cycle. Dinner the evening before; interview days split between interviews and site tours. The January date is only if needed.", opts:[["2026-11-05"], ["2026-11-12"], ["2026-12-03"], ["2026-12-10"], ["2027-01-14"]]},
-  {id:"maine", extras:["2027-02-09"], name:"Maine Medical Center", p:15, note:"Virtual interviews. Second Look / Open House on Tuesday, February 9, 2027 — held as a commitment on the calendar.", opts:[["2026-12-14"], ["2027-01-07"]]},
-  {id:"albany", pre:"Dinner with residents", name:"Albany", p:13, note:"Dinner with residents the evening before.", opts:[["2026-11-16"], ["2026-12-02"]]},
-  {id:"geisinger", pre:"Dinner with residents", name:"Geisinger", p:12, note:"Dinner the evening prior with residents.", opts:[["2026-11-12"], ["2026-11-20"], ["2026-12-04"]]},
-  {id:"rutgers", name:"Rutgers", p:11, note:"No dates in the 9/21/26 sheet — add them when they post.", opts:[]},
-  {id:"yale", post:"Dinner on day one", name:"Yale", p:11, note:"Two-day visits. Dinner with residents on the first day.", opts:[["2026-11-19", "2026-11-20"], ["2026-12-03", "2026-12-04"], ["2026-12-17", "2026-12-18"], ["2027-01-07", "2027-01-08"]]},
-  {id:"miami", pre:"Dinner with residents + faculty", name:"Miami", p:10, note:"Dinner the evening before with residents and faculty.", opts:[["2026-10-17"], ["2026-11-14"]]},
-  {id:"uchicago", pre:"Dinner with residents", name:"UChicago", p:9, note:"Dinner with residents the evening before.", opts:[["2026-10-28"], ["2026-12-02"], ["2026-12-09"]]},
-  {id:"stanford", pre:"Dinner with residents", name:"Stanford", p:9, note:"Dinner the evening before. Interview day includes breakfast, lunch and a campus tour, ending by 2:30 pm.", opts:[["2026-11-06"], ["2026-12-05"], ["2027-01-09"]]}
+  {id:"tufts", tz:-5, city:"Boston, MA", ll:[42.3601,-71.0589], pre:"Dinner with residents", name:"Tufts", p:95, note:"Dinner the evening before.", opts:[["2026-11-12"], ["2026-12-10"], ["2027-01-14"]]},
+  {id:"utah", tz:-7, city:"Salt Lake City, UT", ll:[40.7608,-111.8910], pre:"Dinner with residents", name:"Utah", p:87, note:"Dinner with residents the evening before.", opts:[["2026-10-28"], ["2026-12-02"]]},
+  {id:"dartmouth", tz:-5, city:"Lebanon, NH", ll:[43.6423,-72.2518], pre:"Dinner with residents", name:"Dartmouth", p:72, note:"Dinner with residents the evening before.", opts:[["2026-11-06"], ["2026-11-20"], ["2026-12-18"]]},
+  {id:"vermont", tz:-5, city:"Burlington, VT", ll:[44.4759,-73.2121], pre:"Dinner with residents", name:"Vermont", p:67, note:"Dinner evening before with residents.", opts:[["2026-11-05"], ["2026-12-10"], ["2027-01-07"]]},
+  {id:"wvu", tz:-5, city:"Morgantown, WV", ll:[39.6295,-79.9559], pre:"Dinner + hotel provided", name:"West Virginia", p:65, note:"Dinner night before and hotel provided.", opts:[["2026-11-09"], ["2026-11-13"], ["2026-11-16"], ["2026-11-20"]]},
+  {id:"mgb", tz:-5, city:"Boston, MA", ll:[42.3601,-71.0589], post:"Dinner with residents", name:"MGB", p:62, note:"Dinner the night of interviews with residents only.", opts:[["2027-01-05"], ["2027-01-06"]]},
+  {id:"bidmc", tz:-5, city:"Boston, MA", ll:[42.3391,-71.1065], pre:"Dinner with residents", name:"Beth Israel", p:62, note:"Dinner with residents the evening before interview days.", opts:[["2026-11-13"], ["2026-12-09"], ["2026-12-17"]]},
+  {id:"jefferson", tz:-5, city:"Philadelphia, PA", ll:[39.9496,-75.1582], pre:"Dinner with residents", name:"Thomas Jefferson", p:60, note:"Dinner on Friday evening with the residents. Interview day will be 8am-3pm on Saturday. The interview day will include breakfast, lunch, and a tour of our campus.", opts:[["2026-11-07"], ["2026-12-12"], ["2027-01-09"]]},
+  {id:"vcu", tz:-5, city:"Richmond, VA", ll:[37.5407,-77.4360], name:"VCU", p:60, note:"", opts:[]},
+  {id:"wake", tz:-5, city:"Winston-Salem, NC", ll:[36.0999,-80.2442], pre:"Dinner, 6:30 pm", post:"Optional city tour", name:"Wake Forest", p:60, note:"Dinner the evening before at 6:30 PM. Interview day will run 7:30 AM-1:30 PM with an optional tour of the city following.", opts:[["2026-10-27"], ["2026-11-10"], ["2026-12-08"]]},
+  {id:"georgetown", tz:-5, city:"Washington, DC", ll:[38.9076,-77.0723], name:"Georgetown", p:60, note:"", opts:[]},
+  {id:"gwu", tz:-5, city:"Washington, DC", ll:[38.9009,-77.0506], name:"George Washington", p:60, note:"", opts:[]},
+  {id:"maryland", tz:-5, city:"Baltimore, MD", ll:[39.2904,-76.6122], pre:"Dinner with residents", name:"Maryland", p:57, note:"Dinner evening before.", opts:[["2026-12-18"], ["2027-01-08"], ["2027-01-22"]]},
+  {id:"einstein", tz:-5, city:"Bronx, NY", ll:[40.8448,-73.8648], pre:"Dinner with residents", name:"Albert Einstein", p:57, note:"Dinner with the residents the evening before interviews.", opts:[["2026-11-06"], ["2026-12-04"], ["2026-12-11"], ["2027-01-08"]]},
+  {id:"inova", tz:-5, city:"Falls Church, VA", ll:[38.8823,-77.1711], pre:"Dinner with residents", name:"Inova", p:55, note:"Dinner evening before with residents.", opts:[["2026-11-10"], ["2026-12-01"]]},
+  {id:"uva", tz:-5, city:"Charlottesville, VA", ll:[38.0293,-78.4767], pre:"Meet and greet with residents", post:"Dinner at the PD's home", name:"UVA", p:52, note:"Meet & greet evening before with residents only, dinner at faculty/PD home the evening of interviews, neuroanatomy lab afternoon of interviews, tour of hospital grounds and bus tour of city.", opts:[["2026-11-06"], ["2026-12-11"], ["2027-01-08"]]},
+  {id:"colorado", tz:-7, city:"Aurora, CO", ll:[39.7294,-104.8319], pre:"Presentation + dinner", post:"Cocktails and dinner", name:"Colorado", p:52, note:"There will be a presentation followed by dinner with the residents on Thursday evening. Friday will begin with interviews from approximately 7:30 a.m. to 3:00 p.m., followed by a campus tour. The evening will start with a cocktail hour at the Department Chair’s home, followed by dinner with faculty and residents in Cherry Creek.", opts:[["2026-11-13"], ["2026-12-11"], ["2027-01-08"]]},
+  {id:"unc", tz:-5, city:"Chapel Hill, NC", ll:[35.9132,-79.0558], pre:"Dinner with residents", name:"UNC", p:52, note:"Dinner evening before with residents.", opts:[["2026-12-09"], ["2026-12-16"], ["2027-01-13"]]},
+  {id:"carolinas", tz:-5, city:"Charlotte, NC", ll:[35.2271,-80.8431], name:"Carolinas", p:52, note:"", opts:[]},
+  {id:"pitt", tz:-5, city:"Pittsburgh, PA", ll:[40.4406,-79.9959], name:"Pitt", p:47, note:"", opts:[]},
+  {id:"emory", tz:-5, city:"Atlanta, GA", ll:[33.7490,-84.3880], pre:"Tours + dinner", name:"Emory", p:47, note:"Tours of the hospital sites and dinner with residents the evening prior on January 22 and January 23.", opts:[["2027-01-23", "2027-01-24"]]},
+  {id:"tennessee", tz:-6, city:"Memphis, TN", ll:[35.1495,-90.0490], pre:"Welcome dinner", post:"Optional lab", name:"Tennessee", p:47, note:"Welcome dinner the night before (Sunday). Interviews from 7:30 am to roughly 2:30 pm on Monday followed by a tour of the city and hospitals. Optional lab on Monday night.", opts:[["2026-11-09"], ["2026-12-07"]]},
+  {id:"michigan", tz:-5, city:"Ann Arbor, MI", ll:[42.2808,-83.7430], pre:"Dinner with residents", name:"Michigan", p:42, note:"Dinner evening before.", opts:[["2026-11-11"], ["2026-11-23"], ["2026-12-01"], ["2026-12-11"], ["2027-01-12"]]},
+  {id:"uw", tz:-8, city:"Seattle, WA", ll:[47.6062,-122.3321], pre:"City tour, museum, simulation lab, dinner", preFull:true, name:"U Washington", p:37, note:"Day before includes a city tour and museum experience, surgical simulation lab tour, and dinner with the residents.", opts:[["2026-11-07"], ["2026-12-12"]]},
+  {id:"penn", tz:-5, city:"Philadelphia, PA", ll:[39.9496,-75.1932], post:"Dinner after interviews", name:"Penn", p:37, note:"Full one-day interview (7AM-5PM) with dinner to follow.", opts:[["2026-10-29"], ["2026-11-19"], ["2027-01-07"]]},
+  {id:"duke", tz:-5, city:"Durham, NC", ll:[35.9940,-78.8986], post:"Dinner the evening after (last cycle — confirm)", name:"Duke", p:37, note:"", opts:[["2026-11-14"], ["2026-12-12"]]},
+  {id:"umass", tz:-5, city:"Worcester, MA", ll:[42.2626,-71.8023], pre:"Meet and greet + dinner", name:"UMass", p:19, note:"Meet and Greet with the Faculty & Residents evening before then dinner with Residents.", opts:[["2026-11-17"], ["2026-12-02"], ["2026-12-10"]]},
+  {id:"brown", tz:-5, city:"Providence, RI", ll:[41.8240,-71.4128], pre:"Dinner with residents", name:"Brown", p:16, note:"Dinner evening before with residents.", opts:[["2026-12-01"], ["2026-12-07"]]},
+  {id:"uconn", tz:-5, city:"Farmington, CT", ll:[41.7259,-72.8319], pre:"Dinner with residents", name:"UConn", p:15, note:"Yes, there will be dinner the evening before with residents. On interview days, considering half will interview while the other half go for site tours and then we will switch interviews/site tours.", opts:[["2026-11-05"], ["2026-11-12"], ["2026-12-03"], ["2026-12-10"], ["2027-01-14"]]},
+  {id:"maine", tz:-5, city:"Portland, ME", ll:[43.6591,-70.2568], extras:["2027-02-09"], name:"Maine Medical Center", p:15, note:"Second Look/Open House held on Tuesday, February 9, 2027.", opts:[["2026-12-14"], ["2027-01-07"]]},
+  {id:"albany", tz:-5, city:"Albany, NY", ll:[42.6526,-73.7562], pre:"Dinner with residents", name:"Albany", p:13, note:"Dinner with residents the evening before interview days.", opts:[["2026-11-16"], ["2026-12-02"]]},
+  {id:"geisinger", tz:-5, city:"Danville, PA", ll:[40.9637,-76.6122], pre:"Dinner with residents", name:"Geisinger", p:12, note:"Dinner evening prior with residents.", opts:[["2026-11-12"], ["2026-11-20"], ["2026-12-04"]]},
+  {id:"rutgers", tz:-5, city:"Newark, NJ", ll:[40.7357,-74.1724], name:"Rutgers", p:11, note:"", opts:[]},
+  {id:"yale", tz:-5, city:"New Haven, CT", ll:[41.3083,-72.9279], post:"Dinner on day one", name:"Yale", p:11, note:"Dinner with residents on first day of interviews.", opts:[["2026-11-19", "2026-11-20"], ["2026-12-03", "2026-12-04"], ["2026-12-17", "2026-12-18"], ["2027-01-07", "2027-01-08"]]},
+  {id:"miami", tz:-5, city:"Miami, FL", ll:[25.7617,-80.1918], pre:"Dinner with residents + faculty", name:"Miami", p:10, note:"Dinner evening before with Residents and Faculty.", opts:[["2026-10-17"], ["2026-11-14"]]},
+  {id:"uchicago", tz:-6, city:"Chicago, IL", ll:[41.7886,-87.5987], pre:"Dinner with residents", name:"UChicago", p:9, note:"Dinner with residents the evening before interview day.", opts:[["2026-10-28"], ["2026-12-02"], ["2026-12-09"]]},
+  {id:"stanford", tz:-8, city:"Palo Alto, CA", ll:[37.4419,-122.1430], pre:"Dinner with residents", name:"Stanford", p:9, note:"There will be a dinner the evening before the interview. The interview will include breakfast, lunch and a campus tour. The interview day will end by 2:30 PM.", opts:[["2026-11-06"], ["2026-12-05"], ["2027-01-09"]]}
 ];
 const PREDICTED = Object.fromEntries(PROGRAMS.map(p => [p.id, p.opts]));
 const PRE0  = Object.fromEntries(PROGRAMS.map(p => [p.id, p.pre  || null]));
@@ -514,6 +515,189 @@ function seasonNote(p, days){
   if(t === null || (t >= SWEET_LO && t <= SWEET_HI)) return null;
   if(timingOff(days[0], SEASON) < SAY_SEASON_AT) return null;
   return t < SWEET_LO ? "early in the season" : "late in the season";
+}
+
+/* ---------- travel ----------
+   The tool knows where the programs are and nothing else. It has no flight
+   schedules, no fares, no weather and no idea which airport you'd use, so every
+   verdict below is a geometry argument about distance and hours, and the copy
+   says so rather than implying it checked. You always keep the final call.
+
+   A transfer is judged by the hours actually available between leaving one
+   program and being due at the next, against a door-to-door estimate for the
+   distance. Interview days start early and release you mid-afternoon; a dinner
+   gives you until the evening, which is often the whole difference between a
+   cross-country hop being fine and being a red-eye. */
+const HOME = {name: "Boston", city: "Boston, MA", ll: [42.3601, -71.0589], tz: -5};
+const TRIP_NIGHTS = 2;       // gap up to this stays one trip instead of going home
+
+function miles(a, b){
+  const R = 3958.8, rad = d => d * Math.PI / 180;
+  const dLat = rad(b[0] - a[0]), dLon = rad(b[1] - a[1]);
+  const h = Math.sin(dLat/2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLon/2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const LOCAL_MI = 60;   // close enough to home that there is no journey to show
+function releaseHour(p){ return p.post ? 22 : 15; }
+function requireHour(p){ return p.pre ? (p.preFull ? 9 : 18) : 7.5; }
+function spanOf(p, days){
+  const f = footprint(p, days).map(x => x.day).sort();
+  return {first: f[0], last: f[f.length - 1]};
+}
+function nightsBetween(a, b){ return Math.round((parse(b.first) - parse(a.last)) / 864e5); }
+
+/* ---------- the clock ----------
+   Everything below runs on one absolute timeline measured in hours, with each
+   city's wall clock recovered from its UTC offset. The whole season is standard
+   time, so the offsets are fixed. This is what makes a westbound hop and an
+   eastbound one come out differently: leaving Boston at 6am puts you in Seattle
+   mid-morning, while the same flight home lands after midnight. */
+const EPOCH = "2026-01-01";
+function dayNum(iso){ return Math.round((parse(iso) - parse(EPOCH)) / 864e5); }
+function absHour(iso, hour, tz){ return dayNum(iso) * 24 + hour - tz; }
+function localParts(abs, tz){
+  const local = abs + tz;
+  const day = Math.floor(local / 24);
+  return {day, hour: local - day * 24};
+}
+const WDAY = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function clock(abs, tz){
+  const {day, hour} = localParts(abs, tz);
+  let h = Math.floor(hour), m = Math.round((hour - h) * 60);
+  if(m === 60){ h++; m = 0; }
+  const d = new Date(parse(EPOCH).getTime() + day * 864e5);
+  const ampm = h < 12 ? "am" : "pm";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return WDAY[d.getDay()] + " " + h12 + (m ? ":" + String(m).padStart(2, "0") : "") + ampm;
+}
+
+/* ---------- how you would actually get there ----------
+   Two modes, each simulated against the clock rather than reduced to a number
+   of hours. Driving happens in daylight: you can start at 6am, you stop by
+   10pm, and ten hours is a day's worth. Flying is bounded by when aircraft
+   actually leave — nothing useful departs at 2am — plus getting to the airport,
+   sitting in it, and getting out of the one at the other end.
+
+   None of this is a flight search. There are no schedules, fares, seat
+   availability or weather here: it is the earliest a reasonable person could
+   arrive, and it is wrong the moment a route has no nonstop or the last flight
+   is full. Treat every verdict as a prompt to go and look. */
+const MPH = 55;                                  // interstate average with traffic and stops
+/* You will drive late to get somewhere, but not through the small hours: the
+   wheel is yours from 6am until about 1am, and a drive that would run past that
+   waits for the morning instead. */
+const DRIVE_START = 6, DRIVE_WINDOW = 19, DRIVE_WRAP = 1;
+const DRIVE_LIMIT_MI = 600;                      // beyond this nobody drives to an interview
+const FLY_FIRST = 6, FLY_LAST = 21;              // the window departures actually sit in
+const TO_AIRPORT = 1, CHECKIN = 1.75, DEPLANE = 0.75, FROM_AIRPORT = 1;
+const CRUISE = 500, TAXI = 0.75;                 // mph, plus push-back and climb
+const CONNECT_OVER = 900, CONNECT = 1.5;         // long routes rarely go nonstop from here
+const FLY_MIN_MI = 180;                          // under this, flying loses to the car
+const SLACK_OK = 3;                              // hours spare before a transfer reads as tight
+
+function driveArrival(ready, mi, tz){
+  const hours = mi / MPH;
+  const {day, hour} = localParts(ready, tz);
+  /* Before 1am you are still inside last night's driving window. */
+  let start = (hour < DRIVE_WRAP ? day - 1 : day) * 24 + DRIVE_START;
+  let local = Math.max(day * 24 + hour, start);
+  if(local + hours > start + DRIVE_WINDOW) local = start + 24;   // sleep, go in the morning
+  return (local + hours) - tz;
+}
+function flyArrival(ready, mi, tzFrom){
+  const air = TAXI + mi / CRUISE + (mi > CONNECT_OVER ? CONNECT : 0);
+  let dep = ready + TO_AIRPORT + CHECKIN;
+  let {day, hour} = localParts(dep, tzFrom);
+  if(hour < FLY_FIRST) hour = FLY_FIRST;
+  else if(hour > FLY_LAST){ day += 1; hour = FLY_FIRST; }
+  dep = (day * 24 + hour) - tzFrom;
+  return {dep, arr: dep + air + DEPLANE + FROM_AIRPORT};
+}
+/* The better of the two, by when it actually gets you there. */
+function journey(fromP, toP, ready){
+  const mi = Math.round(miles(fromP.ll, toP.ll));
+  const out = [];
+  if(mi <= DRIVE_LIMIT_MI) out.push({mode: "drive", mi, dep: Math.max(ready, 0), arr: driveArrival(ready, mi, fromP.tz), hours: mi / MPH});
+  if(mi >= FLY_MIN_MI){ const f = flyArrival(ready, mi, fromP.tz); out.push({mode: "fly", mi, dep: f.dep, arr: f.arr}); }
+  if(!out.length) out.push({mode: "drive", mi, dep: ready, arr: driveArrival(ready, mi, fromP.tz), hours: mi / MPH});
+  out.sort((a, b) => a.arr - b.arr);
+  return out[0];
+}
+/* null when the two overlap in time — that is a day conflict, not a travel one. */
+function leg(pA, daysA, pB, daysB){
+  if(!pA.ll || !pB.ll) return null;
+  const a = spanOf(pA, daysA), b = spanOf(pB, daysB);
+  if(b.first <= a.last) return null;
+  const ready = absHour(a.last, releaseHour(pA), pA.tz);
+  const due = absHour(b.first, requireHour(pB), pB.tz);
+  const j = journey(pA, pB, ready);
+  const slack = due - j.arr;
+  const landing = localParts(j.arr, pB.tz).hour;
+  const redEye = landing < 5 && requireHour(pB) < 12;   // in at 2am, interviewing at 7:30
+  return Object.assign(j, {from: pA, to: pB, ready, due, slack,
+    nights: nightsBetween(a, b),
+    verdict: slack < 0 ? "impossible" : (slack < SLACK_OK || redEye) ? "tight" : "ok"});
+}
+function modeText(l){
+  return l.mode === "drive"
+    ? "drive " + (l.hours < 1 ? "under an hour" : Math.round(l.hours) + " h") + ", leave " + clock(l.dep, l.from.tz) + ", there " + clock(l.arr, l.to.tz)
+    : "fly out " + clock(l.dep, l.from.tz) + ", in " + clock(l.arr, l.to.tz);
+}
+function legText(l){
+  return l.from.city + " → " + l.to.city + ", " + l.mi.toLocaleString() + " mi — " + modeText(l)
+    + (l.slack < 0 ? ", and they want you " + clock(l.due, l.to.tz)
+       : ", about " + Math.floor(l.slack) + " h spare");
+}
+/* The booked board in date order, optionally with one date being considered, so
+   a candidate is judged against the neighbours it would actually sit between. */
+function schedule(extraP, extraDays){
+  const rows = [];
+  for(const q of PROGRAMS){
+    const s = state[q.id];
+    if(s && s.status === "booked" && !(extraP && q.id === extraP.id)) rows.push({p: q, days: q.opts[s.opt]});
+  }
+  if(extraP) rows.push({p: extraP, days: extraDays});
+  rows.sort((x, y) => spanOf(x.p, x.days).first < spanOf(y.p, y.days).first ? -1 : 1);
+  return rows;
+}
+/* Only the transfers either side of this date — a program three stops away is
+   somebody else's problem. */
+function travelFor(p, days){
+  const rows = schedule(p, days);
+  const i = rows.findIndex(r => r.p.id === p.id);
+  const out = [];
+  if(i > 0) out.push(leg(rows[i-1].p, rows[i-1].days, p, days));
+  if(i >= 0 && i < rows.length - 1) out.push(leg(p, days, rows[i+1].p, rows[i+1].days));
+  return out.filter(l => l && l.verdict !== "ok");
+}
+
+/* Pair penalties for the whole-board solver, built once per render. The solver
+   evaluates thousands of arrangements, so it cannot sort a schedule each time;
+   instead any two dates close enough in time to constrain each other carry a
+   precomputed cost. A third program landing between them would ease the pair in
+   reality, so this slightly over-penalises crowded weeks — acceptable in a cost
+   function whose job is to steer, not to rule. */
+const PLAN_TRAVEL = {impossible: 2.5, tight: 0.4};
+let TRAVEL_PEN = {};
+function buildTravel(){
+  TRAVEL_PEN = {};
+  const nodes = [];
+  for(const p of PROGRAMS){
+    if(!p.ll) continue;
+    p.opts.forEach((o, i) => nodes.push({p, i, days: o, span: spanOf(p, o)}));
+  }
+  for(let a = 0; a < nodes.length; a++){
+    for(let b = a + 1; b < nodes.length; b++){
+      const A = nodes[a], B = nodes[b];
+      if(A.p.id === B.p.id) continue;
+      const first = A.span.first <= B.span.first ? A : B, second = first === A ? B : A;
+      if(nightsBetween(first.span, second.span) > 3) continue;
+      const l = leg(first.p, first.days, second.p, second.days);
+      if(!l || l.verdict === "ok") continue;
+      (TRAVEL_PEN[A.p.id] = TRAVEL_PEN[A.p.id] || {});
+      (TRAVEL_PEN[A.p.id][A.i] = TRAVEL_PEN[A.p.id][A.i] || []).push([B.p.id, B.i, PLAN_TRAVEL[l.verdict]]);
+    }
+  }
 }
 
 function applyDates(){
@@ -685,16 +869,23 @@ function rank(prog){
     const clash = days.map(d => taken[d]).filter(x => x && x !== prog.id).map(id => BY_ID[id]);
     const hurt = clash.length ? [] : squeeze(prog, i, taken);
     const near = clash.length ? [] : eveningClashes(prog, i, taken);
-    let cost = clash.length ? 1e6 : 0;
+    const trav = clash.length ? [] : travelFor(prog, days);
+    const stranded = trav.some(l => l.verdict === "impossible");
+    let cost = clash.length ? 1e6 : stranded ? 5e5 : 0;
     for(const h of hurt) cost += weight(h.prog) * (h.lost ? 6 : 1) * (h.before - h.now) / Math.max(h.before, 1);
     for(const n of near) cost += 30 + weight(n.prog) * 0.3;
+    for(const l of trav) if(l.verdict === "tight") cost += 40;
     /* Last, and smallest: nudge a top pick toward the middle of the season. */
     if(!clash.length) cost += TIMING_MAX * (off[i] || 0);
-    return {i, days, clash, hurt, near, cost};
+    return {i, days, clash, hurt, near, trav, stranded, cost};
   }).sort((a,b) => a.cost - b.cost || a.i - b.i);
 }
 function reason(o, prog){
   if(o.clash.length) return "Taken — " + o.clash.map(p => p.name).join(", ") + " is booked this day.";
+  if(o.stranded){
+    const l = o.trav.find(x => x.verdict === "impossible");
+    return "You couldn't get there — " + legText(l) + ". Distance only; the tool has no flight schedules.";
+  }
   const bits = [];
   const lost = o.hurt.filter(h => h.lost);
   const label = pr => pr.name + (tops[pr.id] ? " (top pick)" : " (" + pr.p + "%)");
@@ -702,6 +893,7 @@ function reason(o, prog){
   const tight = o.hurt.filter(h => !h.lost).slice(0,2);
   if(tight.length) bits.push("narrows " + tight.map(h => h.prog.name + " to " + h.now).join(", "));
   for(const n of o.near) bits.push(n.prog.name + ": " + n.why);
+  for(const l of (o.trav || [])) bits.push("tight transfer, " + legText(l));
   const season = prog ? seasonNote(prog, o.days) : null;
   if(!bits.length) bits.push("clear — nothing else needs this day");
   if(season) bits.push(season);
@@ -711,6 +903,7 @@ function reason(o, prog){
 /* ---------- render ---------- */
 function render(){
   buildTiming();
+  buildTravel();
   const taken = bookedMap(), held = heldDays(taken);
   const plan = bestPlan();
   const planPick = {};
@@ -883,9 +1076,13 @@ function render(){
       el.append(n);
     } else {
       open++; exp += p.p/100;
-      const n = document.createElement("div");
-      n.className = "pnote"; n.textContent = p.note; n.title = p.note;
-      el.append(n);
+      /* Only what the sheet's commitment column says — blank for programs that
+         left it blank, rather than an empty line. */
+      if(p.note){
+        const n = document.createElement("div");
+        n.className = "pnote"; n.textContent = p.note; n.title = p.note;
+        el.append(n);
+      }
 
       if(p.opts.length === 0){
         const w = document.createElement("div");
@@ -1014,8 +1211,30 @@ function render(){
           return;
         }
 
+        /* A transfer the geometry says you can't make. Nobody else holds the
+           day, so there is nothing to swap — the date simply isn't offered as a
+           plain choice, and one press takes it anyway. */
+        if(o.stranded){
+          const wrap = document.createElement("div");
+          wrap.className = "opt blocked static";
+          const rk = document.createElement("span");
+          rk.className = "rank"; rk.textContent = "Can't travel";
+          const d = document.createElement("span");
+          d.className = "d"; d.textContent = fmtOpt(o.days);
+          const why = document.createElement("span");
+          why.className = "why"; why.textContent = reason(o, p);
+          const anyway = document.createElement("button");
+          anyway.className = "anyway";
+          anyway.textContent = "Book anyway";
+          anyway.dataset.act = "forcebook"; anyway.dataset.id = p.id; anyway.dataset.opt = o.i;
+          wrap.append(rk, d, why, anyway);
+          opts.append(wrap);
+          return;
+        }
+
+        const tightTravel = (o.trav || []).length > 0;
         const btn = document.createElement("button");
-        btn.className = "opt " + (idx === 0 ? "best" : risky ? "risky" : "");
+        btn.className = "opt " + (idx === 0 ? "best" : risky || tightTravel ? "risky" : "");
         const rk = document.createElement("span");
         rk.className = "rank";
         rk.textContent = idx === 0 ? "Take this" : risky ? "Last resort" : "Fallback " + idx;
@@ -1074,30 +1293,9 @@ function render(){
 
   renderTops();
   renderSqueezed(taken);
-  renderCalendar(taken, held);
-  renderRules();
+  renderTravel();
+  renderCalendar(taken, held, travelDays());
   wireAll();
-}
-
-/* The standing rules name real programs, so they are written from the board
-   rather than hard-coded — otherwise they start lying the moment dates arrive. */
-function renderRules(){
-  const single = PROGRAMS.filter(p => p.opts.length === 1).map(p => p.name);
-  const none = PROGRAMS.filter(p => p.opts.length === 0).map(p => p.name);
-  const list = xs => xs.length > 1 ? xs.slice(0,-1).join(", ") + " and " + xs[xs.length-1] : xs[0];
-  const scarce = document.getElementById("rule-scarce");
-  if(scarce) scarce.textContent = single.length
-    ? (single.length === 1 ? single[0] + " offers one date only." : list(single) + " offer one date only.")
-    : "Some programs offer only a date or two.";
-  const buffer = document.getElementById("rule-buffer");
-  if(buffer) buffer.textContent = none.length
-    ? list(none) + " " + (none.length === 1 ? "has" : "have") + " no dates yet — leave room."
-    : "Every program on the board has dates now, so there is nothing left to hold room for.";
-  const mid = document.getElementById("rule-mid");
-  if(mid) mid.textContent = SEASON
-    ? "Top picks are steered toward " + fmtMD(shift(SEASON.lo, Math.round(SEASON.days * SWEET_LO)))
-      + "–" + fmtMD(shift(SEASON.lo, Math.round(SEASON.days * SWEET_HI))) + ", the middle of this season."
-    : "Top picks are steered toward the middle of the season once there are enough dates to tell where that is.";
 }
 
 function renderSqueezed(taken){
@@ -1136,6 +1334,122 @@ function renderSqueezed(taken){
     row.append(tag, pc);
     list.append(row);
   }
+}
+
+/* Consecutive bookings close enough together to be one journey; a longer gap
+   means going home to Boston in between. */
+function trips(){
+  const rows = schedule().filter(r => r.p.ll);
+  const out = [];
+  for(const r of rows){
+    const cur = out[out.length - 1];
+    if(cur){
+      const prev = cur.stops[cur.stops.length - 1];
+      if(nightsBetween(spanOf(prev.p, prev.days), spanOf(r.p, r.days)) <= TRIP_NIGHTS){
+        cur.legs.push(leg(prev.p, prev.days, r.p, r.days));
+        cur.stops.push(r);
+        continue;
+      }
+    }
+    out.push({stops: [r], legs: []});
+  }
+  for(const t of out){
+    const first = t.stops[0], last = t.stops[t.stops.length - 1];
+    t.from = spanOf(first.p, first.days).first;
+    t.to = spanOf(last.p, last.days).last;
+    t.outMi = Math.round(miles(HOME.ll, first.p.ll));
+    t.backMi = Math.round(miles(last.p.ll, HOME.ll));
+
+    /* The journey out is the one leg you control completely: if leaving on the
+       day itself doesn't get you there, you leave the day before, and the day
+       before that. So it stays flagged only when no head start would do it. */
+    const due = absHour(t.from, requireHour(first.p), first.p.tz);
+    let early = 0, out1 = null;
+    for(; early < 3; early++){
+      const depDay = early ? shift(t.from, -early) : t.from;
+      out1 = journey(HOME, first.p, absHour(depDay, DRIVE_START, HOME.tz));
+      if(due - out1.arr >= SLACK_OK) break;
+    }
+    t.depart = early ? shift(t.from, -early) : t.from;
+    t.leaveEarly = early > 0;
+    t.out = Object.assign(out1, {from: HOME, to: first.p, due, slack: due - out1.arr,
+      verdict: due - out1.arr < 0 ? "impossible" : due - out1.arr < SLACK_OK ? "tight" : "ok"});
+
+    /* Home again whenever the last program lets you go — which may well be the
+       small hours of the following morning after a flight from the far coast. */
+    const ready = absHour(t.to, releaseHour(last.p), last.p.tz);
+    const home = journey(last.p, HOME, ready);
+    t.home = Object.assign(home, {from: last.p, to: HOME, slack: 99, verdict: "ok"});
+    t.backDayOffset = localParts(home.arr, HOME.tz).day - dayNum(t.to);
+    t.returnNextDay = t.backDayOffset > 0;
+    t.back = t.returnNextDay ? shift(t.to, t.backDayOffset) : t.to;
+  }
+  return out;
+}
+/* Free days spent getting somewhere, for the calendar. */
+function travelDays(){
+  const busy = {};
+  for(const r of schedule()) for(const f of footprint(r.p, r.days)) busy[f.day] = true;
+  const marks = {};
+  for(const t of trips()){
+    t.legs.forEach((l, i) => {
+      const a = spanOf(t.stops[i].p, t.stops[i].days), b = spanOf(t.stops[i+1].p, t.stops[i+1].days);
+      for(let d = shift(a.last, 1); d < b.first; d = shift(d, 1)) if(!busy[d]) marks[d] = l.to.city.split(",")[0];
+    });
+    for(let d = t.depart; d < t.from; d = shift(d, 1)) if(!busy[d]) marks[d] = t.stops[0].p.city.split(",")[0];
+    if(t.returnNextDay && !busy[t.back]) marks[t.back] = HOME.name;
+  }
+  return marks;
+}
+function legLine(l){
+  return "→ " + l.to.city + " · " + l.mi.toLocaleString() + " mi · " + modeText(l)
+    + (l.verdict === "impossible" ? " · not possible — they want you " + clock(l.due, l.to.tz)
+       : l.verdict === "tight" ? " · tight, " + Math.max(0, Math.floor(l.slack)) + " h spare"
+       : l.slack < 48 ? " · " + Math.floor(l.slack) + " h spare" : "");
+}
+function renderTravel(){
+  const panel = document.getElementById("travel-panel");
+  const list = document.getElementById("travel");
+  if(!panel || !list) return;
+  list.textContent = "";
+  const ts = trips();
+  panel.hidden = ts.length === 0;
+  document.getElementById("travel-count").textContent = ts.length ? "(" + ts.length + ")" : "";
+  for(const t of ts){
+    const box = document.createElement("div");
+    box.className = "trip";
+    const hd = document.createElement("div");
+    hd.className = "trip-head";
+    const when = document.createElement("span");
+    when.className = "d"; when.textContent = fmtMD(t.depart) + " – " + fmtMD(t.back);
+    const where = document.createElement("span");
+    where.className = "trip-where";
+    where.textContent = t.stops.map(s => s.p.city.split(",")[0]).join(" → ");
+    hd.append(when, where);
+    box.append(hd);
+    const line = (text, cls) => {
+      const e = document.createElement("div");
+      e.className = "trip-line" + (cls ? " " + cls : "");
+      e.textContent = text;
+      box.append(e);
+    };
+    const endCls = v => v.verdict === "impossible" ? "bad" : v.verdict === "tight" ? "warn" : "move";
+    const endNote = v => v.verdict === "ok" ? "" : " · " + (v.verdict === "tight" ? "tight" : "not possible");
+    if(t.outMi > LOCAL_MI) line("Leave " + HOME.name + " · " + t.outMi.toLocaleString() + " mi · " + modeText(t.out) + endNote(t.out), endCls(t.out));
+    t.stops.forEach((s, i) => {
+      line(s.p.name + " — " + fmtOpt(s.days) + ", " + s.p.city, "stop");
+      const l = t.legs[i];
+      if(l) line(legLine(l), l.verdict === "impossible" ? "bad" : l.verdict === "tight" ? "warn" : "move");
+    });
+    if(t.backMi > LOCAL_MI) line("Back to " + HOME.name + " · " + t.backMi.toLocaleString() + " mi · " + modeText(t.home), "move");
+    else if(t.outMi <= LOCAL_MI) line("No travel — this one is at home.", "move");
+    list.append(box);
+  }
+  const note = document.createElement("div");
+  note.className = "travel-note";
+  note.textContent = "Earliest you could reasonably get there, from distance, driving hours and when flights operate. "
+    + "No schedules, fares or seats were checked — confirm before you rely on any of it.";
+  list.append(note);
 }
 
 /* The picker is 37 chips long, so it stays folded once a choice has been made:
@@ -1205,8 +1519,26 @@ function planCost(assign, openList, fixed){
     const off = TIMING[p.id];
     if(off) cost += PLAN_TIMING_MAX * (off[assign[k]] || 0);
   });
+  /* Travel: every pair of chosen dates close enough in time to constrain each
+     other. Each pair is stored once, under whichever node was seen first. */
+  const chosen = PLAN_CHOSEN;
+  for(const k in chosen) delete chosen[k];
+  for(const p of PROGRAMS){
+    const st = state[p.id];
+    if(st && st.status === "booked") chosen[p.id] = st.opt;
+  }
+  openList.forEach((p, k) => { chosen[p.id] = assign[k]; });
+  for(const id in chosen){
+    const byOpt = TRAVEL_PEN[id];
+    if(!byOpt) continue;
+    const lst = byOpt[chosen[id]];
+    if(!lst) continue;
+    for(let i = 0; i < lst.length; i++) if(chosen[lst[i][0]] === lst[i][1]) cost += lst[i][2];
+  }
   return cost;
 }
+/* Reused across the solver's many thousand evaluations rather than reallocated. */
+const PLAN_CHOSEN = {};
 let planMemo = {key:null, value:null};
 function bestPlan(){
   const key = JSON.stringify({picks: state, dates, tops, commits});
@@ -1393,7 +1725,7 @@ function setDates(id, next, removedIndex){
   save();
 }
 
-function renderCalendar(taken, held){
+function renderCalendar(taken, held, travel){
   const wrap = document.getElementById("calendar");
   wrap.textContent = "";
   const evenings = bookedEvenings();
@@ -1420,7 +1752,8 @@ function renderCalendar(taken, held){
       const holdP = held[iso];
       const openHere = openByDay[iso] || [];
       const eve = evenings[iso];
-      c.className = "cell" + (bookedId ? " bookedday" : eve ? (eve.kind === "evening" ? " evening" : " evening full") : holdP ? " hold" : HOLIDAYS[iso] ? " holiday" : openHere.length ? " has" : "");
+      const trip = travel && travel[iso];
+      c.className = "cell" + (bookedId ? " bookedday" : eve ? (eve.kind === "evening" ? " evening" : " evening full") : holdP ? " hold" : HOLIDAYS[iso] ? " holiday" : trip ? " travel" : openHere.length ? " has" : "");
       const dn = document.createElement("span"); dn.className = "dn"; dn.textContent = day; c.append(dn);
       const who = document.createElement("span"); who.className = "who";
       if(bookedId){
@@ -1429,6 +1762,7 @@ function renderCalendar(taken, held){
         else if(BY_ID[bookedId].post) who.textContent += " · evening";
       }
       else if(eve) who.textContent = eve.p.name + (eve.kind === "extra" ? " · second look" : eve.kind === "daybefore" ? " · day before" : " dinner");
+      else if(trip) who.textContent = "travel · " + trip;
       else if(holdP) who.textContent = "hold · " + holdP.name;
       else if(HOLIDAYS[iso]) who.textContent = HOLIDAYS[iso];
       else if(openHere.length) who.textContent = openHere.slice(0,3).map(p => p.name).join(", ") + (openHere.length > 3 ? " +" + (openHere.length-3) : "");
@@ -1443,7 +1777,7 @@ function renderCalendar(taken, held){
   }
   const leg = document.createElement("div");
   leg.className = "legend";
-  const items = [["var(--ok-soft)","Booked"],["var(--warn-soft)","Evening commitment"],["var(--crit-soft)","Hold — someone's last date"],["var(--surface)","Offered by an open program"],["var(--accent-soft)","Holiday"]];
+  const items = [["var(--ok-soft)","Booked"],["var(--warn-soft)","Evening commitment"],["var(--crit-soft)","Hold — someone's last date"],["var(--surface-3)","Travelling"],["var(--surface)","Offered by an open program"],["var(--accent-soft)","Holiday"]];
   for(const [bg, label] of items){
     const s = document.createElement("span");
     const sw = document.createElement("span");
@@ -1469,6 +1803,15 @@ function doAct(el){
   try{
     switch(el.dataset.act){
       case "book":   setStatus(id, {status:"booked", opt: +el.dataset.opt}); break;
+      case "forcebook": {
+        /* Taking a transfer the tool called impossible. It is distance maths,
+           not a flight search, so the decision stays yours — but say so. */
+        const p = BY_ID[id], opt = +el.dataset.opt;
+        state[id] = {status: "booked", opt};
+        flash = "Booked " + p.name + " on " + fmtOpt(p.opts[opt]) + " over a travel warning. Check the flights before you rely on it.";
+        render(); save();
+        break;
+      }
       case "out":    setStatus(id, {status:"out"}); break;
       case "reopen": setStatus(id, null); break;
       case "edit":   editing[id] = !editing[id]; if(!editing[id]) delete editMsg[id]; render(); break;
