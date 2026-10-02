@@ -1971,19 +1971,41 @@ function setStatus(id, val){
   render();
   save();
 }
+/* Firestore stores no array inside an array, and a date option is a list of
+   days (two-day visits exist). Each option therefore crosses the wire as one
+   space-separated string. Reading is tolerant of both shapes, so a record
+   written by an older build still loads. */
+function packDates(d){
+  const out = {};
+  for(const id in (d || {})) out[id] = (d[id] || []).map(o => o.join(" "));
+  return out;
+}
+function unpackDates(d){
+  const out = {};
+  for(const id in (d || {})){
+    out[id] = (d[id] || []).map(o => Array.isArray(o) ? o : String(o).split(" ").filter(Boolean));
+  }
+  return out;
+}
+function wire(){ return {picks: state, dates: packDates(dates), tops, commits}; }
+/* When this browser last changed anything, so a stale cloud record can't
+   overwrite newer work after a spell of failed saves. */
+let localStamp = "";
+
 function save(){
-  try{ localStorage.setItem("nsgy-schedule", JSON.stringify({picks: state, dates, tops, commits})); }catch(e){}
+  localStamp = new Date().toISOString();
+  try{ localStorage.setItem("nsgy-schedule", JSON.stringify(Object.assign(wire(), {updated: localStamp}))); }catch(e){}
   pending = true;
   if(!fsdoc) return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
-    const body = JSON.stringify({picks: state, dates, tops, commits});
+    const body = JSON.stringify(wire());
     if(body === lastSaved) return;
     const el = document.getElementById("saving");
     try{
-      await fsdoc.set({picks: state, dates, tops, commits, updated: new Date().toISOString()});
+      await fsdoc.set(Object.assign(wire(), {updated: localStamp}));
       lastSaved = body;
-      if(body === JSON.stringify({picks: state, dates, tops, commits})) pending = false;
+      if(body === JSON.stringify(wire())) pending = false;
       el.textContent = "saved " + new Date().toLocaleTimeString([], {hour: "numeric", minute: "2-digit"});
       setTimeout(() => { if(el.textContent.startsWith("saved")) el.textContent = ""; }, 4000);
     }catch(e){
@@ -1995,7 +2017,7 @@ function save(){
 }
 function adopt(doc){
   state = (doc && doc.picks) || {};
-  dates = (doc && doc.dates) || {};
+  dates = unpackDates(doc && doc.dates);
   tops = (doc && doc.tops) || {};
   commits = (doc && doc.commits) || {};
   applyDates();
@@ -2005,6 +2027,7 @@ try{
   if(raw){
     const saved = JSON.parse(raw);
     adopt(saved && saved.picks ? saved : {picks: saved});   // older saves held picks alone
+    localStamp = (saved && saved.updated) || "";
   }
 }catch(e){ state = {}; dates = {}; tops = {}; commits = {}; }
 applyDates();
@@ -2104,9 +2127,13 @@ async function connect(){
       try{
         const snap = await fsdoc.get();
         const remote = snap.exists ? snap.data() : null;
-        if(remote && !isEmptyDoc(remote) && !pending){
+        /* Whoever wrote last wins. Without a stamp on one side, anything this
+           browser is holding is treated as the newer of the two. */
+        const remoteNewer = remote && remote.updated && localStamp && remote.updated >= localStamp;
+        if(remote && !isEmptyDoc(remote) && !pending && (remoteNewer || !hasLocalWork())){
           adopt(remote);
-          lastSaved = JSON.stringify({picks: state, dates, tops, commits});
+          localStamp = remote.updated || localStamp;
+          lastSaved = JSON.stringify(wire());
           render();
           setSync("on", "loaded");
         } else if(hasLocalWork()){
@@ -2118,8 +2145,9 @@ async function connect(){
         fsdoc.onSnapshot(s => {
           if(!s.exists || pending || s.metadata.hasPendingWrites) return;
           const doc = s.data();
-          const body = JSON.stringify({picks: doc.picks || {}, dates: doc.dates || {}, tops: doc.tops || {}});
-          if(body === JSON.stringify({picks: state, dates, tops})) return;
+          const body = JSON.stringify({picks: doc.picks || {}, dates: packDates(unpackDates(doc.dates)),
+                                       tops: doc.tops || {}, commits: doc.commits || {}});
+          if(body === JSON.stringify(wire())) return;
           adopt(doc); lastSaved = body; render();
         });
       }catch(e){ setSync("error", "Couldn't read your saved board: " + (e.code || e.message) + ". Nothing is syncing — check the Firestore rule."); }
