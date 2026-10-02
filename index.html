@@ -539,7 +539,8 @@ function miles(a, b){
 }
 const LOCAL_MI = 60;   // close enough to home that there is no journey to show
 function releaseHour(p){ return p.post ? 22 : 15; }
-function requireHour(p){ return p.pre ? (p.preFull ? 9 : 18) : 7.5; }
+const INTERVIEW_START = 8;
+function requireHour(p){ return p.pre ? (p.preFull ? 9 : 18) : INTERVIEW_START; }
 function spanOf(p, days){
   const f = footprint(p, days).map(x => x.day).sort();
   return {first: f[0], last: f[f.length - 1]};
@@ -563,8 +564,8 @@ function localParts(abs, tz){
 const WDAY = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 function clock(abs, tz){
   const {day, hour} = localParts(abs, tz);
-  let h = Math.floor(hour), m = Math.round((hour - h) * 60);
-  if(m === 60){ h++; m = 0; }
+  let h = Math.floor(hour), m = Math.round((hour - h) * 12) * 5;   // nearest five minutes
+  if(m >= 60){ h++; m -= 60; }
   const d = new Date(parse(EPOCH).getTime() + day * 864e5);
   const ampm = h < 12 ? "am" : "pm";
   const h12 = h % 12 === 0 ? 12 : h % 12;
@@ -583,45 +584,50 @@ function clock(abs, tz){
    arrive, and it is wrong the moment a route has no nonstop or the last flight
    is full. Treat every verdict as a prompt to go and look. */
 const MPH = 55;                                  // interstate average with traffic and stops
-/* You will drive late to get somewhere, but not through the small hours: the
-   wheel is yours from 6am until about 1am, and a drive that would run past that
-   waits for the morning instead. */
-const DRIVE_START = 6, DRIVE_WINDOW = 19, DRIVE_WRAP = 1;
-const DRIVE_LIMIT_MI = 600;                      // beyond this nobody drives to an interview
+/* Driving happens on the day itself — up early and go, rather than travelling
+   the night before and paying for a hotel. 4am is the earliest alarm worth
+   setting, which caps a drive to an 8am start at about four hours. */
+const DRIVE_EARLIEST = 4;
+const DRIVE_LIMIT_MI = 300;                      // past this, flying wins whatever the clock says
 const FLY_FIRST = 6, FLY_LAST = 21;              // the window departures actually sit in
 const TO_AIRPORT = 1, CHECKIN = 1.75, DEPLANE = 0.75, FROM_AIRPORT = 1;
 const CRUISE = 500, TAXI = 0.75;                 // mph, plus push-back and climb
 const CONNECT_OVER = 900, CONNECT = 1.5;         // long routes rarely go nonstop from here
 const FLY_MIN_MI = 180;                          // under this, flying loses to the car
-const SLACK_OK = 3;                              // hours spare before a transfer reads as tight
+const SLACK_OK = 1.5;                            // hours spare before a transfer reads as tight
 
-function driveArrival(ready, mi, tz){
+/* `due` is when they want you; pass null for the run home, where there is
+   nothing to be late for and you simply leave when you are released. */
+function driveJourney(ready, mi, due, tz){
   const hours = mi / MPH;
-  const {day, hour} = localParts(ready, tz);
-  /* Before 1am you are still inside last night's driving window. */
-  let start = (hour < DRIVE_WRAP ? day - 1 : day) * 24 + DRIVE_START;
-  let local = Math.max(day * 24 + hour, start);
-  if(local + hours > start + DRIVE_WINDOW) local = start + 24;   // sleep, go in the morning
-  return (local + hours) - tz;
+  const earliest = due == null ? ready
+    : Math.max(ready, localParts(due, tz).day * 24 + DRIVE_EARLIEST - tz);
+  /* No point setting off at 4am for a dinner: leave late enough to arrive with
+     the buffer intact, unless the drive is long enough to need the whole morning. */
+  const relaxed = due == null ? earliest : Math.max(earliest, due - hours - SLACK_OK);
+  return {mode: "drive", mi, dep: relaxed, arr: relaxed + hours, hours,
+          forced: due != null && relaxed <= earliest};
 }
-function flyArrival(ready, mi, tzFrom){
+function flyJourney(ready, mi, tzFrom){
   const air = TAXI + mi / CRUISE + (mi > CONNECT_OVER ? CONNECT : 0);
   let dep = ready + TO_AIRPORT + CHECKIN;
   let {day, hour} = localParts(dep, tzFrom);
   if(hour < FLY_FIRST) hour = FLY_FIRST;
   else if(hour > FLY_LAST){ day += 1; hour = FLY_FIRST; }
   dep = (day * 24 + hour) - tzFrom;
-  return {dep, arr: dep + air + DEPLANE + FROM_AIRPORT};
+  return {mode: "fly", mi, dep, arr: dep + air + DEPLANE + FROM_AIRPORT};
 }
-/* The better of the two, by when it actually gets you there. */
-function journey(fromP, toP, ready){
+/* Driving is the preference whenever it actually works; otherwise fly. */
+function journey(fromP, toP, ready, due){
   const mi = Math.round(miles(fromP.ll, toP.ll));
-  const out = [];
-  if(mi <= DRIVE_LIMIT_MI) out.push({mode: "drive", mi, dep: Math.max(ready, 0), arr: driveArrival(ready, mi, fromP.tz), hours: mi / MPH});
-  if(mi >= FLY_MIN_MI){ const f = flyArrival(ready, mi, fromP.tz); out.push({mode: "fly", mi, dep: f.dep, arr: f.arr}); }
-  if(!out.length) out.push({mode: "drive", mi, dep: ready, arr: driveArrival(ready, mi, fromP.tz), hours: mi / MPH});
-  out.sort((a, b) => a.arr - b.arr);
-  return out[0];
+  const opts = [];
+  if(mi <= DRIVE_LIMIT_MI) opts.push(driveJourney(ready, mi, due, fromP.tz));
+  if(mi >= FLY_MIN_MI) opts.push(flyJourney(ready, mi, fromP.tz));
+  if(!opts.length) opts.push(driveJourney(ready, mi, due, fromP.tz));
+  if(due == null) return opts.sort((a, b) => a.arr - b.arr)[0];
+  const fits = opts.filter(o => o.arr <= due);
+  if(fits.length) return fits.find(o => o.mode === "drive") || fits[0];
+  return opts.sort((a, b) => a.arr - b.arr)[0];
 }
 /* null when the two overlap in time — that is a day conflict, not a travel one. */
 function leg(pA, daysA, pB, daysB){
@@ -630,10 +636,12 @@ function leg(pA, daysA, pB, daysB){
   if(b.first <= a.last) return null;
   const ready = absHour(a.last, releaseHour(pA), pA.tz);
   const due = absHour(b.first, requireHour(pB), pB.tz);
-  const j = journey(pA, pB, ready);
+  const j = journey(pA, pB, ready, due);
   const slack = due - j.arr;
   const landing = localParts(j.arr, pB.tz).hour;
-  const redEye = landing < 5 && requireHour(pB) < 12;   // in at 2am, interviewing at 7:30
+  /* Landing at 3am for a morning interview counts as tight however the
+     arithmetic falls. A 4am start in your own car does not. */
+  const redEye = j.mode === "fly" && landing < 5 && requireHour(pB) < 12;
   return Object.assign(j, {from: pA, to: pB, ready, due, slack,
     nights: nightsBetween(a, b),
     verdict: slack < 0 ? "impossible" : (slack < SLACK_OK || redEye) ? "tight" : "ok"});
@@ -1367,7 +1375,7 @@ function trips(){
     let early = 0, out1 = null;
     for(; early < 3; early++){
       const depDay = early ? shift(t.from, -early) : t.from;
-      out1 = journey(HOME, first.p, absHour(depDay, DRIVE_START, HOME.tz));
+      out1 = journey(HOME, first.p, absHour(depDay, DRIVE_EARLIEST, HOME.tz), due);
       if(due - out1.arr >= SLACK_OK) break;
     }
     t.depart = early ? shift(t.from, -early) : t.from;
@@ -1378,7 +1386,7 @@ function trips(){
     /* Home again whenever the last program lets you go — which may well be the
        small hours of the following morning after a flight from the far coast. */
     const ready = absHour(t.to, releaseHour(last.p), last.p.tz);
-    const home = journey(last.p, HOME, ready);
+    const home = journey(last.p, HOME, ready, null);
     t.home = Object.assign(home, {from: last.p, to: HOME, slack: 99, verdict: "ok"});
     t.backDayOffset = localParts(home.arr, HOME.tz).day - dayNum(t.to);
     t.returnNextDay = t.backDayOffset > 0;
@@ -1405,7 +1413,7 @@ function legLine(l){
   return "→ " + l.to.city + " · " + l.mi.toLocaleString() + " mi · " + modeText(l)
     + (l.verdict === "impossible" ? " · not possible — they want you " + clock(l.due, l.to.tz)
        : l.verdict === "tight" ? " · tight, " + Math.max(0, Math.floor(l.slack)) + " h spare"
-       : l.slack < 48 ? " · " + Math.floor(l.slack) + " h spare" : "");
+       : (l.mode === "fly" || l.forced) && l.slack < 48 ? " · " + Math.floor(l.slack) + " h spare" : "");
 }
 function renderTravel(){
   const panel = document.getElementById("travel-panel");
