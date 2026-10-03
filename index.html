@@ -233,6 +233,8 @@ button.anyway:focus-visible{outline:2px solid var(--crit); outline-offset:2px}
 .gate-btn:hover{filter:brightness(1.08)}
 .gate-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .gate-msg{margin-top:16px; font-size:13.5px; color:var(--crit)}
+.gate-row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.gate-alt{margin-top:18px; padding-top:14px; border-top:1px solid var(--line)}
 .metrics{width:100%; font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted)}
 .saving{font-size:12.5px; color:var(--muted); font-family:"IBM Plex Mono",monospace; white-space:nowrap}
 footer{margin-top:32px; font-size:13px; color:var(--muted); border-top:1px solid var(--line); padding-top:16px; max-width:80ch}
@@ -321,8 +323,14 @@ button.ghost:focus-visible{outline:2px solid var(--accent); outline-offset:2px; 
   <section class="panel gate" id="gate" hidden>
     <h2>Sign in to continue</h2>
     <p>This board is tied to your Google account. Your bookings, dates and top picks are stored privately and are visible only to you.</p>
-    <button class="gate-btn" data-act="signin">Sign in with Google</button>
+    <div class="gate-row">
+      <button class="gate-btn" data-act="signin">Sign in with Google</button>
+      <button class="mini" data-act="signinredirect" id="gate-redirect" hidden>Open Google in this tab</button>
+    </div>
     <div class="gate-msg" id="gate-msg"></div>
+    <div class="gate-alt">
+      <button class="ghost" data-act="skipgate">Use this device without signing in</button>
+    </div>
   </section>
 
   <div class="cols" id="app">
@@ -1884,6 +1892,8 @@ function doAct(el){
       case "togglepre":  setCommit(id, "pre",  !BY_ID[id].pre);  break;
       case "togglepost": setCommit(id, "post", !BY_ID[id].post); break;
       case "signin":  signIn(); break;
+      case "signinredirect": signInRedirect(); break;
+      case "skipgate": skipGate(); break;
       case "signout": firebase.auth().signOut(); break;
       case "diag":   document.getElementById("metrics").hidden = true; break;
     }
@@ -2211,28 +2221,63 @@ async function connect(){
     setSync("offline", "Sync unavailable (" + (e.code || e.message) + "). Saving in this browser.");
   }
 }
-/* A phone blocks popups far more often than it allows them, and a blocked popup
-   looks exactly like the button doing nothing. On a touch device, go straight to
-   the redirect flow instead of discovering that the hard way. */
-function phoneLike(){
-  try{ if(matchMedia("(pointer: coarse)").matches) return true; }catch(_){}
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
-}
+/* Two ways in, and neither works everywhere. The popup keeps the tap that
+   opened it, which is what most browsers want; the redirect navigates the whole
+   page, which some in-app browsers refuse to do — and when they refuse they do
+   it silently, leaving the promise hanging forever. So: popup first, redirect
+   only when you ask for it, and a watchdog so a hang shows its hand rather than
+   sitting on a message that never changes. */
 const POPUP_WONT_WORK = ["auth/popup-blocked", "auth/operation-not-supported-in-this-environment",
-                         "auth/web-storage-unsupported", "auth/cancelled-popup-request"];
+                         "auth/web-storage-unsupported", "auth/cancelled-popup-request",
+                         "auth/popup-closed-by-user", "auth/internal-error"];
+let signInWatch = null;
+function offerRedirect(msg){
+  clearTimeout(signInWatch);
+  lock(msg, "info");
+  const b = document.getElementById("gate-redirect");
+  if(b) b.hidden = false;
+}
+function watchSignIn(){
+  clearTimeout(signInWatch);
+  signInWatch = setTimeout(() => {
+    offerRedirect("Google hasn't come back. This browser may be blocking it — try opening it in this tab, "
+                + "or carry on without signing in and the board will save on this device.");
+  }, 8000);
+}
 async function signIn(){
-  const provider = () => new firebase.auth.GoogleAuthProvider();
   try{
     lock("Opening Google…", "info");
-    if(phoneLike()) return await firebase.auth().signInWithRedirect(provider());
-    await firebase.auth().signInWithPopup(provider());
+    watchSignIn();
+    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    clearTimeout(signInWatch);
   }catch(e){
-    if(POPUP_WONT_WORK.indexOf((e && e.code) || "") >= 0){
-      try{ return await firebase.auth().signInWithRedirect(provider()); }catch(e2){ e = e2; }
+    clearTimeout(signInWatch);
+    const code = (e && e.code) || "";
+    if(POPUP_WONT_WORK.indexOf(code) >= 0){
+      offerRedirect("Your browser wouldn't open the Google window (" + code + ").");
+      return;
     }
-    lock("Sign-in failed (" + ((e && (e.code || e.message)) || "unknown") + ").");
+    lock("Sign-in failed (" + (code || (e && e.message) || "unknown") + ").");
     setSync("signin", "Sign-in failed. ");
   }
+}
+async function signInRedirect(){
+  try{
+    lock("Sending you to Google…", "info");
+    watchSignIn();
+    await firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+  }catch(e){
+    clearTimeout(signInWatch);
+    lock("Sign-in failed (" + ((e && (e.code || e.message)) || "unknown") + ").");
+  }
+}
+/* The gate is a courtesy lock — the file is public and the data is protected by
+   the Firestore rule, not by this screen. It must never be the thing that stops
+   you using the tool on the device the invites actually arrive on. */
+function skipGate(){
+  clearTimeout(signInWatch);
+  unlock();
+  setSync("signin", "Not signed in — saving on this device only. ");
 }
 connect();
 </script>
