@@ -2039,12 +2039,34 @@ function save(){
     }
   }, 350);
 }
+/* A saved board outlives the dates it was saved against. Options get added,
+   removed, or replaced wholesale when a program publishes its real dates, and a
+   booking saved against the old list can end up pointing past the end of the new
+   one. Left alone that takes the entire render down, which is how one stale
+   phone turns into a blank page. Anything that no longer resolves is reopened
+   and named, because silently dropping a booking is worse than losing it. */
+function reconcile(){
+  const lost = [];
+  for(const p of PROGRAMS){
+    const s = state[p.id];
+    if(!s || s.status !== "booked") continue;
+    if(!Array.isArray(p.opts[s.opt])){ lost.push(p.name); delete state[p.id]; }
+  }
+  if(lost.length){
+    const one = lost.length === 1;
+    flash = lost.join(" and ") + (one ? "'s booked date is" : "'s booked dates are")
+      + " no longer on " + (one ? "its" : "their") + " list, so "
+      + (one ? "it is" : "they are") + " open again — rebook from the dates showing now.";
+  }
+  return lost;
+}
 function adopt(doc){
   state = (doc && doc.picks) || {};
   dates = unpackDates(doc && doc.dates);
   tops = (doc && doc.tops) || {};
   commits = (doc && doc.commits) || {};
   applyDates();
+  reconcile();
 }
 try{
   const raw = localStorage.getItem("nsgy-schedule");
