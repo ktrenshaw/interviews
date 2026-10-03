@@ -1958,12 +1958,36 @@ function paintMetrics(){
   if(metrics.taps >= 3 && metrics.acts === 0) el.hidden = false;
   if(!el.hidden) el.textContent = "taps " + metrics.taps + " · clicks " + metrics.clicks + " · actions " + metrics.acts;
 }
+/* The first real failure is the one worth seeing. Anything that arrives later
+   is usually noise from whatever else is running in the page, and letting it
+   overwrite the message hides the cause. */
+let troubled = false;
 function showTrouble(msg){
+  if(troubled) return;
+  troubled = true;
   const el = document.getElementById("diag");
   if(el) el.textContent = "Something went wrong: " + msg;
 }
-window.addEventListener("error", e => showTrouble(e.message));
-window.addEventListener("unhandledrejection", e => showTrouble((e.reason && e.reason.message) || String(e.reason)));
+/* Browser extensions and in-app browsers inject their own scripts into this
+   page, and their errors land on this listener exactly like ours would. They
+   are not this tool failing, and reporting them as though they were sends you
+   chasing a bug that isn't here. Only errors from this document count. */
+function ourError(e){
+  const f = e && e.filename;
+  if(location.protocol === "file:") return true;
+  if(!f) return false;                                   /* opaque cross-origin error */
+  if(/^[a-z][a-z0-9.+-]*-extension:\/\//i.test(f)) return false;
+  try{ return new URL(f, location.href).origin === location.origin; }catch(_){ return false; }
+}
+window.addEventListener("error", e => {
+  if(!ourError(e)) return;
+  showTrouble(e.message + (e.lineno ? " (line " + e.lineno + ")" : ""));
+});
+window.addEventListener("unhandledrejection", e => {
+  const m = (e.reason && e.reason.message) || String(e.reason || "");
+  if(/runtime\.sendMessage|extension context|Tab not found/i.test(m)) return;
+  showTrouble(m);
+});
 
 /* ---------- persistence ---------- */
 function setStatus(id, val){
@@ -2031,7 +2055,10 @@ try{
   }
 }catch(e){ state = {}; dates = {}; tops = {}; commits = {}; }
 applyDates();
-render();
+/* A failure drawing the board must not take sign-in and syncing down with it:
+   without this, one bad render leaves a blank page and no way back. */
+try{ render(); }
+catch(err){ showTrouble("couldn't draw the board — " + (err && err.message ? err.message : String(err))); }
 
 /* ---------- cloud sync (Firebase) ----------
    Project: nsgyinterviews. The apiKey is a public client identifier, not a
@@ -2050,13 +2077,13 @@ let fsdoc = null, account = "";
    rule either way. */
 const ALLOWED_EMAIL = "";
 
-function lock(msg){
+function lock(msg, kind){
   const g = document.getElementById("gate"), app = document.getElementById("app"), st = document.getElementById("app-stats");
   if(g) g.hidden = false;
   if(app) app.hidden = true;
   if(st) st.hidden = true;
   const m = document.getElementById("gate-msg");
-  if(m) m.textContent = msg || "";
+  if(m){ m.textContent = msg || ""; m.style.color = kind === "info" ? "var(--muted)" : "var(--crit)"; }
 }
 function unlock(){
   const g = document.getElementById("gate"), app = document.getElementById("app"), st = document.getElementById("app-stats");
@@ -2110,11 +2137,16 @@ async function connect(){
     setSync("offline", "Saving in this browser. Add your Firebase config to sync across devices.");
     return;
   }
-  lock();
+  lock("Checking your sign-in…", "info");
   try{
     if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    /* Coming back from the redirect flow: if it failed, say so rather than
+       sitting on the gate as though nothing had been tried. */
+    firebase.auth().getRedirectResult().catch(e => {
+      lock("Sign-in didn't complete (" + ((e && (e.code || e.message)) || "unknown") + "). Try again.");
+    });
     firebase.auth().onAuthStateChanged(async user => {
-      if(!user){ fsdoc = null; account = ""; lock(); setSync("signin"); return; }
+      if(!user){ fsdoc = null; account = ""; lock(""); setSync("signin"); return; }
       if(ALLOWED_EMAIL && user.email !== ALLOWED_EMAIL){
         lock("Signed in as " + user.email + ", which can't open this board. Sign out and use the right account.");
         setSync("signin", "Wrong account. ");
@@ -2157,12 +2189,27 @@ async function connect(){
     setSync("offline", "Sync unavailable (" + (e.code || e.message) + "). Saving in this browser.");
   }
 }
+/* A phone blocks popups far more often than it allows them, and a blocked popup
+   looks exactly like the button doing nothing. On a touch device, go straight to
+   the redirect flow instead of discovering that the hard way. */
+function phoneLike(){
+  try{ if(matchMedia("(pointer: coarse)").matches) return true; }catch(_){}
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+}
+const POPUP_WONT_WORK = ["auth/popup-blocked", "auth/operation-not-supported-in-this-environment",
+                         "auth/web-storage-unsupported", "auth/cancelled-popup-request"];
 async function signIn(){
+  const provider = () => new firebase.auth.GoogleAuthProvider();
   try{
-    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    lock("Opening Google…", "info");
+    if(phoneLike()) return await firebase.auth().signInWithRedirect(provider());
+    await firebase.auth().signInWithPopup(provider());
   }catch(e){
-    if(e && e.code === "auth/popup-blocked") firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-    else { lock("Sign-in failed (" + (e.code || e.message) + ")."); setSync("signin", "Sign-in failed. "); }
+    if(POPUP_WONT_WORK.indexOf((e && e.code) || "") >= 0){
+      try{ return await firebase.auth().signInWithRedirect(provider()); }catch(e2){ e = e2; }
+    }
+    lock("Sign-in failed (" + ((e && (e.code || e.message)) || "unknown") + ").");
+    setSync("signin", "Sign-in failed. ");
   }
 }
 connect();
